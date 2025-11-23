@@ -15,7 +15,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Sincronizar métricas de Google Search Console diariamente a las 2 AM
+        $schedule->command('seo:sync-metrics --days=1')
+            ->dailyAt('02:00')
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

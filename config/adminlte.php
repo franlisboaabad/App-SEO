@@ -306,46 +306,33 @@ return [
             'type' => 'sidebar-menu-search',
             'text' => 'search',
         ],
-        [
-            'text' => 'blog',
-            'url'  => 'admin/blog',
-            'can'  => 'manage-blog',
-        ],
-
 
 
         [
-            'text'        => 'Clientes',
-            'route'         => 'clientes.index', //apunta a ruta url route
-            'icon'        => 'fa fa-user',
-            'can'  => 'admin.clientes.index',
-
+            'text' => 'Dashboard',
+            'icon' => 'fas fa-chart-line',
+            'route' => 'dashboard',
+            'can' => 'admin.home',
         ],
 
+        ['header' => 'SEO'],
         [
-            'text'        => 'Proyectos',
-            'route'         => 'proyectos.index',
-            'icon'        => 'fa fa-cube',
-            'can'  => 'admin.proyectos.index',
-
+            'text'        => 'Sitios Web',
+            'icon'        => 'fas fa-globe',
+            'can'         => 'admin.sites.index',
+            'submenu' => [
+                [
+                    'text' => 'Lista de Sitios',
+                    'route' => 'sites.index',
+                    'can' => 'admin.sites.index',
+                ],
+                [
+                    'text' => 'Nuevo Sitio',
+                    'route' => 'sites.create',
+                    'can' => 'admin.sites.create',
+                ],
+            ],
         ],
-
-        [
-            'text'        => 'Actividades',
-            'route'         => 'actividades.index', //apunta a ruta url route
-            'icon'        => 'fa fa-cubes',
-            'can'  => 'admin.actividad.index',
-
-        ],
-
-        [
-            'text'        => 'Tareas',
-            'route'         => 'tareas.index', //apunta a ruta url route
-            'icon'        => 'fa fa-envelope',
-            'can'  => 'admin.tareas.index',
-
-        ],
-
 
         ['header' => 'account_settings'],
         [
@@ -490,12 +477,12 @@ return [
             ],
         ],
         'Chartjs' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js',
+                    'location' => '//cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js',
                 ],
             ],
         ],

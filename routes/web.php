@@ -1,19 +1,11 @@
 <?php
 
-use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\InvitadoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\Admin\SiteController;
+use App\Http\Controllers\Admin\SeoAuditController;
 use App\Http\Controllers\Dashboard;
-use App\Http\Controllers\EquipoController;
-use App\Http\Controllers\OrdenDeServicioController;
-use App\Http\Controllers\ProyectoController;
-use App\Http\Controllers\TareaController;
-use App\Http\Controllers\ArtistaController;
-use App\Models\Equipment;
-use App\Models\OrdenDeServicio;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,10 +23,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::get('/dashboard',[Dashboard::class,'home'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -44,43 +32,20 @@ Route::middleware('auth')->group(function () {
 });
 
 
+// Rutas de administración SEO
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::resource('usuarios', UserController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('sites', SiteController::class);
 
-Route::resource('usuarios',UserController::class)->middleware('auth');
-Route::resource('invitados', InvitadoController::class)->middleware('auth');
-Route::resource('roles', RoleController::class)->middleware('auth');
-Route::resource('clientes',ClienteController::class)->middleware('auth');
-/** rutas soft v2.0 */
+    // Dashboard SEO
+    Route::get('sites/{site}/dashboard', [SiteController::class, 'dashboard'])->name('sites.dashboard');
 
-Route::resource('proyectos', ProyectoController::class)->middleware('auth');
-Route::resource('actividades', ActividadController::class)->middleware('auth')->parameters(['actividades' => 'actividad']);
-Route::resource('tareas', TareaController::class)->middleware('auth');
-
-
-/* routes v3.0 Eventos */
-
-Route::resource('artistas', ArtistaController::class);
-Route::post('/artista/{id}', [ArtistaController::class, 'getArtistaData'])->name('artista.data');
-
-
-
-
-/** soft v1.0  */
-Route::resource('equipos',EquipoController::class)->middleware('auth');
-Route::resource('ordenes-de-servicio',OrdenDeServicioController::class)->middleware('auth')->parameters(['ordenes-de-servicio' => 'orden',]);
-
-/** ruta para Imagenes equipos */
-Route::delete('equipos/{equipo}/delete-imagen-equipo/{id}',  [EquipoController::class, 'deleteImagen'] )->name('equipos.deleteimagen');
-
-Route::get('/invitados/registrar/{invitadoId}', [InvitadoController::class, 'registrar'])->name('invitados.registrar');
-Route::get('/invitados/validar-qr/{codigo}', [InvitadoController::class, 'validarQR'])->name('invitados.validar-qr');
-Route::get('invitados/generar-pdf/{invitado}', [InvitadoController::class, 'generarPDF'])->name('invitados.generarPDF');
-
-
-
-
-
-Route::get('/url', function () {
-    return view('url');
+    // Rutas de auditorías SEO
+    Route::post('sites/{site}/audit', [SeoAuditController::class, 'runAudit'])->name('sites.audit');
+    Route::get('sites/{site}/audits', [SeoAuditController::class, 'index'])->name('sites.audits');
+    Route::get('audits/{audit}', [SeoAuditController::class, 'show'])->name('audits.show');
 });
+
 
 require __DIR__.'/auth.php';

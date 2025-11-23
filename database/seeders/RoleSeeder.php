@@ -29,6 +29,19 @@ class RoleSeeder extends Seeder
                 'admin.usuarios.edit' => 'Editar usuario',
                 'admin.usuarios.update' => 'Actualizar usuario y asignar roles',
             ],
+            'sites' => [
+                'admin.sites.index' => 'Lista de sitios',
+                'admin.sites.create' => 'Crear sitio',
+                'admin.sites.edit' => 'Editar sitio',
+                'admin.sites.show' => 'Ver detalles del sitio',
+                'admin.sites.dashboard' => 'Ver dashboard SEO',
+                'admin.sites.destroy' => 'Eliminar sitio',
+            ],
+            'audits' => [
+                'admin.audits.index' => 'Ver auditorías',
+                'admin.audits.show' => 'Ver detalles de auditoría',
+                'admin.audits.run' => 'Ejecutar auditoría',
+            ],
         ];
     }
 
