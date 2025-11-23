@@ -8,6 +8,9 @@
             <h1>Detalles del Sitio: {{ $site->nombre }}</h1>
         </div>
         <div class="col-md text-right">
+            <a href="{{ route('sites.report', $site) }}" class="btn btn-danger" target="_blank">
+                <i class="fas fa-file-pdf"></i> Reporte PDF
+            </a>
             <a href="{{ route('sites.edit', $site) }}" class="btn btn-warning">
                 <i class="fas fa-edit"></i> Editar
             </a>

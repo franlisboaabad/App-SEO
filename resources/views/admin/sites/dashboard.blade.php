@@ -8,6 +8,9 @@
             <h1>Dashboard SEO: {{ $site->nombre }}</h1>
         </div>
         <div class="col-md text-right">
+            <a href="{{ route('sites.report', $site) }}?days={{ $period }}" class="btn btn-danger" target="_blank">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </a>
             <a href="{{ route('sites.show', $site) }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver
             </a>

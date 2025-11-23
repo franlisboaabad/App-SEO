@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\Admin\SeoAuditController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,11 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('sites/{site}/audit', [SeoAuditController::class, 'runAudit'])->name('sites.audit');
     Route::get('sites/{site}/audits', [SeoAuditController::class, 'index'])->name('sites.audits');
     Route::get('audits/{audit}', [SeoAuditController::class, 'show'])->name('audits.show');
+
+    // Rutas de reportes PDF
+    Route::get('sites/{site}/report', [ReportController::class, 'siteReport'])->name('sites.report');
+    Route::get('sites/{site}/metrics-report', [ReportController::class, 'metricsReport'])->name('sites.metrics-report');
+    Route::get('audits/{audit}/report', [ReportController::class, 'auditReport'])->name('audits.report');
 });
 
 

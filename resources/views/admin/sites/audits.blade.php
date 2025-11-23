@@ -95,9 +95,14 @@
                                 <td>{{ $audit->created_at->format('d/m/Y H:i:s') }}</td>
                                 <td>
                                     @if($audit->status == 'completed' && $audit->result)
-                                        <a href="{{ route('audits.show', $audit) }}" class="btn btn-sm btn-info" title="Ver detalles">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('audits.show', $audit) }}" class="btn btn-sm btn-info" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('audits.report', $audit) }}" class="btn btn-sm btn-danger" title="Exportar PDF" target="_blank">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                        </div>
                                     @elseif($audit->status == 'failed')
                                         <button type="button"
                                                 class="btn btn-sm btn-danger"

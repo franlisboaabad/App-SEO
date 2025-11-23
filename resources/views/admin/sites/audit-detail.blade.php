@@ -8,6 +8,11 @@
             <h1>Detalles de Auditoría SEO</h1>
         </div>
         <div class="col-md text-right">
+            @if($audit->result)
+                <a href="{{ route('audits.report', $audit) }}" class="btn btn-danger" target="_blank">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </a>
+            @endif
             <a href="{{ route('sites.audits', $audit->site) }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver al Historial
             </a>
@@ -41,11 +46,11 @@
                     </div>
                     <div class="card-body">
                         <div class="progress mb-2" style="height: 30px;">
-                            <div class="progress-bar bg-{{ $scoreClass }} progress-bar-striped" 
-                                 role="progressbar" 
+                            <div class="progress-bar bg-{{ $scoreClass }} progress-bar-striped"
+                                 role="progressbar"
                                  style="width: {{ $score }}%"
-                                 aria-valuenow="{{ $score }}" 
-                                 aria-valuemin="0" 
+                                 aria-valuenow="{{ $score }}"
+                                 aria-valuemin="0"
                                  aria-valuemax="100">
                                 {{ $score }}%
                             </div>
