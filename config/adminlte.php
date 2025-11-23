@@ -352,6 +352,12 @@ return [
                     'icon' => 'fas fa-plus',
                     'can' => 'admin.keywords.create',
                 ],
+                [
+                    'text' => 'Investigación de Keywords',
+                    'route'  => 'keyword-research.index',
+                    'icon' => 'fas fa-search',
+                    'can' => 'admin.keywords.index',
+                ],
             ],
         ],
         [
@@ -402,7 +408,7 @@ return [
             'text' => 'Alertas SEO',
             'icon' => 'fas fa-bell',
             'route' => 'alerts.index',
-
+            'can' => 'admin.alerts.index',
             'badge' => [
                 'text' => '0',
                 'color' => 'danger',

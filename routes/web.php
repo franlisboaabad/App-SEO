@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SeoTaskController;
 use App\Http\Controllers\Admin\CompetitorController;
 use App\Http\Controllers\Admin\UserManualController;
 use App\Http\Controllers\Admin\SeoAlertController;
+use App\Http\Controllers\Admin\KeywordResearchController;
 use App\Http\Controllers\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -70,6 +71,14 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('keywords', KeywordController::class);
     Route::get('keywords/{keyword}/dashboard', [KeywordController::class, 'dashboard'])->name('keywords.dashboard');
     Route::post('keywords/update-positions', [KeywordController::class, 'updatePositions'])->name('keywords.update-positions');
+
+    // Rutas de Investigación de Keywords
+    Route::get('keyword-research', [KeywordResearchController::class, 'index'])->name('keyword-research.index');
+    Route::post('keyword-research/search-gsc', [KeywordResearchController::class, 'searchFromGSC'])->name('keyword-research.search-gsc');
+    Route::post('keyword-research/search-related', [KeywordResearchController::class, 'searchRelated'])->name('keyword-research.search-related');
+    Route::post('keyword-research/{keywordResearch}/add-to-tracking', [KeywordResearchController::class, 'addToTracking'])->name('keyword-research.add-to-tracking');
+    Route::put('keyword-research/{keywordResearch}', [KeywordResearchController::class, 'update'])->name('keyword-research.update');
+    Route::delete('keyword-research/{keywordResearch}', [KeywordResearchController::class, 'destroy'])->name('keyword-research.destroy');
 
     // Rutas de Tareas SEO
     Route::resource('tasks', SeoTaskController::class);

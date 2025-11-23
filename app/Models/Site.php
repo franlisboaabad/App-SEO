@@ -71,6 +71,14 @@ class Site extends Model
     }
 
     /**
+     * Relación con investigación de keywords
+     */
+    public function keywordResearch()
+    {
+        return $this->hasMany(\App\Models\KeywordResearch::class);
+    }
+
+    /**
      * Scope para sitios activos
      */
     public function scopeActive($query)
