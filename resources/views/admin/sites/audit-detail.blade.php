@@ -215,11 +215,107 @@
                                     @endif
                                 </td>
                             </tr>
+                            <tr>
+                                <th>Palabras en Contenido</th>
+                                <td>
+                                    @if($result->word_count)
+                                        <span class="badge badge-{{ $result->word_count >= 500 ? 'success' : ($result->word_count >= 300 ? 'warning' : 'danger') }}">
+                                            {{ number_format($result->word_count) }} palabras
+                                        </span>
+                                        @if($result->word_count < 300)
+                                            <small class="text-danger ml-2">(Recomendado: 300+)</small>
+                                        @elseif($result->word_count < 500)
+                                            <small class="text-warning ml-2">(Recomendado: 500+)</small>
+                                        @endif
+                                    @else
+                                        <span class="badge badge-secondary">N/A</span>
+                                    @endif
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Análisis de Contenido -->
+        @if($result->word_count || !empty($result->keyword_density))
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Análisis de Contenido</h3>
+                        </div>
+                        <div class="card-body">
+                            @if($result->word_count)
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="info-box">
+                                            <span class="info-box-icon bg-info"><i class="fas fa-font"></i></span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Total de Palabras</span>
+                                                <span class="info-box-number">{{ number_format($result->word_count) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(!empty($result->keyword_density))
+                                <h4>Densidad de Keywords (Top 10)</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Keyword</th>
+                                                <th>Frecuencia</th>
+                                                <th>Densidad</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($result->keyword_density as $keyword)
+                                                @php
+                                                    $densityStatus = $keyword['density'] >= 1 && $keyword['density'] <= 2 ? 'success' : ($keyword['density'] < 1 ? 'warning' : 'danger');
+                                                @endphp
+                                                <tr>
+                                                    <td><strong>{{ $keyword['keyword'] }}</strong></td>
+                                                    <td>{{ $keyword['frequency'] }}</td>
+                                                    <td>
+                                                        <span class="badge badge-{{ $densityStatus }}">
+                                                            {{ $keyword['density'] }}%
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        @if($keyword['density'] >= 1 && $keyword['density'] <= 2)
+                                                            <span class="badge badge-success">Óptimo</span>
+                                                        @elseif($keyword['density'] < 1)
+                                                            <span class="badge badge-warning">Bajo</span>
+                                                        @else
+                                                            <span class="badge badge-danger">Alto (keyword stuffing?)</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
+                            @if(!empty($result->content_suggestions))
+                                <h4 class="mt-3">Sugerencias de Contenido</h4>
+                                @foreach($result->content_suggestions as $suggestion)
+                                    <div class="alert alert-{{ $suggestion['type'] == 'warning' ? 'warning' : 'info' }}">
+                                        <i class="fas fa-{{ $suggestion['type'] == 'warning' ? 'exclamation-triangle' : 'info-circle' }}"></i>
+                                        {{ $suggestion['message'] }}
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <!-- Links -->
         <div class="row mt-3">

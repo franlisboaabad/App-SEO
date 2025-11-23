@@ -325,11 +325,13 @@ return [
                     'text' => 'Lista de Sitios',
                     'route' => 'sites.index',
                     'can' => 'admin.sites.index',
+                    'icon' => 'fas fa-list',
                 ],
                 [
                     'text' => 'Nuevo Sitio',
                     'route' => 'sites.create',
                     'can' => 'admin.sites.create',
+                    'icon' => 'fas fa-plus',
                 ],
             ],
         ],
@@ -396,8 +398,24 @@ return [
                 ],
             ],
         ],
+        [
+            'text' => 'Alertas SEO',
+            'icon' => 'fas fa-bell',
+            'route' => 'alerts.index',
 
-        ['header' => 'account_settings'],
+            'badge' => [
+                'text' => '0',
+                'color' => 'danger',
+                'id' => 'alerts-badge',
+            ],
+        ],
+        [
+            'text' => 'Manual de Usuario',
+            'icon' => 'fas fa-book',
+            'route' => 'user-manual.index',
+        ],
+
+        ['header' => 'CONFIG'],
         [
             'text' => 'Configuracion',
             'icon' => 'fas fa-fw fa-lock',
@@ -405,14 +423,17 @@ return [
                 [
                     'text' => 'Roles',
                     'route'  => 'roles.index',
-                    'can' => 'admin.roles.index'
+                    'can' => 'admin.roles.index',
+                    'icon' => 'fas fa-user-tag',
                 ],
 
                 [
                     'text'        => 'Usuarios',
                     'route'         => 'usuarios.index',
                     'can'  => 'admin.usuarios.index',
+                    'icon' => 'fas fa-user',
                 ],
+
 
             ],
 

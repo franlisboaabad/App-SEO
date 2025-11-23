@@ -90,6 +90,9 @@ class SeoAuditService
                 // Actualizar estado de la auditoría
                 $audit->update(['status' => 'completed']);
 
+                // Generar alertas de contenido si hay problemas
+                $this->generateContentAlerts($audit, $auditResult);
+
                 // Generar tareas automáticamente desde errores y advertencias críticas
                 $this->generateTasksFromAudit($audit, $auditResult);
 
@@ -224,6 +227,83 @@ class SeoAuditService
             // Ignorar
         }
 
+        // Análisis de contenido
+        try {
+            // Obtener texto del body (sin scripts y styles)
+            $bodyText = $crawler->filter('body')->each(function (Crawler $node) {
+                // Remover scripts, styles y otros elementos no visibles
+                $node->filter('script, style, noscript')->each(function (Crawler $el) {
+                    $el->getNode(0)->parentNode->removeChild($el->getNode(0));
+                });
+                return $node->text();
+            });
+
+            $fullText = implode(' ', $bodyText);
+            $wordCount = str_word_count(strip_tags($fullText));
+            $result['word_count'] = $wordCount;
+
+            // Análisis de densidad de keywords (extraer palabras más frecuentes)
+            $words = str_word_count(strtolower($fullText), 1, 'áéíóúñü');
+            // Filtrar palabras comunes (stop words en español)
+            $stopWords = ['el', 'la', 'de', 'que', 'y', 'a', 'en', 'un', 'ser', 'se', 'no', 'haber', 'por', 'con', 'su', 'para', 'como', 'estar', 'tener', 'le', 'lo', 'todo', 'pero', 'más', 'hacer', 'o', 'poder', 'decir', 'este', 'ir', 'otro', 'ese', 'la', 'si', 'me', 'ya', 'ver', 'porque', 'dar', 'cuando', 'él', 'muy', 'sin', 'vez', 'mucho', 'saber', 'qué', 'sobre', 'mi', 'alguno', 'mismo', 'yo', 'también', 'hasta', 'año', 'dos', 'querer', 'entre', 'así', 'primero', 'desde', 'grande', 'eso', 'ni', 'nos', 'llegar', 'pasar', 'tiempo', 'ella', 'sí', 'día', 'uno', 'bien', 'poco', 'deber', 'entonces', 'poner', 'cosa', 'tanto', 'hombre', 'parecer', 'nuestro', 'tan', 'donde', 'ahora', 'parte', 'después', 'vida', 'quedar', 'siempre', 'creer', 'hablar', 'llevar', 'dejar', 'nada', 'cada', 'seguir', 'menos', 'nuevo', 'encontrar', 'algo', 'solo', 'mientras', 'poder', 'año', 'mil', 'hacer', 'aunque', 'menos', 'casa', 'trabajar', 'mujer', 'sin', 'seis', 'nunca', 'menos', 'mundo', 'hacer', 'año', 'mismo', 'año', 'año', 'año'];
+            $filteredWords = array_filter($words, function($word) use ($stopWords) {
+                return strlen($word) > 3 && !in_array($word, $stopWords) && !is_numeric($word);
+            });
+
+            $wordFreq = array_count_values($filteredWords);
+            arsort($wordFreq);
+            $topKeywords = array_slice($wordFreq, 0, 10, true);
+
+            // Calcular densidad (frecuencia / total palabras * 100)
+            $keywordDensity = [];
+            foreach ($topKeywords as $keyword => $freq) {
+                $density = ($freq / $wordCount) * 100;
+                $keywordDensity[] = [
+                    'keyword' => $keyword,
+                    'frequency' => $freq,
+                    'density' => round($density, 2),
+                ];
+            }
+            $result['keyword_density'] = $keywordDensity;
+
+            // Sugerencias de contenido
+            $suggestions = [];
+            if ($wordCount < 300) {
+                $suggestions[] = [
+                    'type' => 'warning',
+                    'message' => "El contenido tiene solo {$wordCount} palabras. Se recomienda al menos 300 palabras para mejor SEO.",
+                ];
+            } elseif ($wordCount < 500) {
+                $suggestions[] = [
+                    'type' => 'info',
+                    'message' => "El contenido tiene {$wordCount} palabras. Se recomienda 500+ palabras para contenido de calidad.",
+                ];
+            }
+
+            // Verificar densidad de keywords principales
+            if (!empty($keywordDensity)) {
+                $mainKeyword = $keywordDensity[0];
+                if ($mainKeyword['density'] < 0.5) {
+                    $suggestions[] = [
+                        'type' => 'warning',
+                        'message' => "La densidad de la keyword principal '{$mainKeyword['keyword']}' es baja ({$mainKeyword['density']}%). Se recomienda 1-2%.",
+                    ];
+                } elseif ($mainKeyword['density'] > 3) {
+                    $suggestions[] = [
+                        'type' => 'warning',
+                        'message' => "La densidad de la keyword '{$mainKeyword['keyword']}' es muy alta ({$mainKeyword['density']}%). Puede ser considerado keyword stuffing.",
+                    ];
+                }
+            }
+
+            $result['content_suggestions'] = $suggestions;
+        } catch (Exception $e) {
+            Log::warning("Error al analizar contenido: " . $e->getMessage());
+            $result['word_count'] = 0;
+            $result['keyword_density'] = [];
+            $result['content_suggestions'] = [];
+        }
+
         // Links - Guardar lista completa
         $result['internal_links'] = [];
         $result['external_links'] = [];
@@ -333,6 +413,38 @@ class SeoAuditService
             return $response->status();
         } catch (Exception $e) {
             return 0; // Error desconocido
+        }
+    }
+
+    /**
+     * Generar alertas de contenido
+     */
+    private function generateContentAlerts(SeoAudit $audit, AuditResult $result)
+    {
+        $alertService = new \App\Services\AlertService();
+
+        // Alerta si el contenido es muy corto
+        if ($result->word_count && $result->word_count < 300) {
+            $alertService->createContentAlert(
+                $audit->site,
+                $audit->url,
+                'Contenido corto',
+                "La página tiene solo {$result->word_count} palabras. Se recomienda al menos 300 palabras para mejor SEO."
+            );
+        }
+
+        // Alerta si hay sugerencias de contenido críticas
+        if (!empty($result->content_suggestions)) {
+            foreach ($result->content_suggestions as $suggestion) {
+                if ($suggestion['type'] == 'warning') {
+                    $alertService->createContentAlert(
+                        $audit->site,
+                        $audit->url,
+                        'Problema de contenido',
+                        $suggestion['message']
+                    );
+                }
+            }
         }
     }
 

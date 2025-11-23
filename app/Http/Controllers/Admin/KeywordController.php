@@ -217,15 +217,30 @@ class KeywordController extends Controller
         $keywords = $query->get();
         $updated = 0;
 
+        $alertService = new AlertService();
+
         foreach ($keywords as $keyword) {
+            $oldPosition = $keyword->current_position;
             $newPosition = $this->getCurrentPosition($keyword->site_id, $keyword->keyword);
 
             if ($newPosition !== null) {
                 $keyword->update([
-                    'previous_position' => $keyword->current_position,
+                    'previous_position' => $oldPosition,
                     'current_position' => $newPosition,
                     'last_checked' => Carbon::now(),
                 ]);
+
+                // Crear alerta si hay pérdida significativa de posición
+                if ($oldPosition !== null && ($newPosition - $oldPosition) > 5) {
+                    $alertService->createPositionAlert(
+                        $keyword->site,
+                        $keyword->keyword,
+                        $keyword->target_url,
+                        $oldPosition,
+                        $newPosition
+                    );
+                }
+
                 $updated++;
             }
         }

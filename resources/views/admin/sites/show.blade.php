@@ -119,6 +119,12 @@
                     <button type="button" class="btn btn-success btn-block mb-2" data-toggle="modal" data-target="#syncMetricsModal">
                         <i class="fas fa-sync"></i> Sincronizar Métricas
                     </button>
+                    <form action="{{ route('sites.validate-technical', $site) }}" method="POST" class="d-inline-block w-100">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-block mb-2">
+                            <i class="fas fa-check-circle"></i> Validar Sitemap/Robots
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -254,5 +260,46 @@
             $('#btnSubmitAudit').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Encolando...');
         });
     </script>
+
+    @if(session()->has('validation_results'))
+        @php $results = session('validation_results'); @endphp
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-check-circle"></i> Resultados de Validación Técnica</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Sitemap.xml</h5>
+                                <p>
+                                    @if($results['sitemap']['valid'])
+                                        <span class="badge badge-success"><i class="fas fa-check"></i> Válido</span>
+                                    @else
+                                        <span class="badge badge-danger"><i class="fas fa-times"></i> Inválido</span>
+                                    @endif
+                                </p>
+                                <p><strong>URL:</strong> <a href="{{ $results['sitemap']['url'] }}" target="_blank">{{ $results['sitemap']['url'] }}</a></p>
+                                <p><small class="text-muted">{{ $results['sitemap']['message'] }}</small></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Robots.txt</h5>
+                                <p>
+                                    @if($results['robots']['valid'])
+                                        <span class="badge badge-success"><i class="fas fa-check"></i> Válido</span>
+                                    @else
+                                        <span class="badge badge-danger"><i class="fas fa-times"></i> Inválido</span>
+                                    @endif
+                                </p>
+                                <p><strong>URL:</strong> <a href="{{ $results['robots']['url'] }}" target="_blank">{{ $results['robots']['url'] }}</a></p>
+                                <p><small class="text-muted">{{ $results['robots']['message'] }}</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @stop
 

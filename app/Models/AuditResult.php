@@ -20,6 +20,9 @@ class AuditResult extends Model
         'images_total',
         'canonical',
         'robots_meta',
+        'word_count',
+        'keyword_density',
+        'content_suggestions',
         'internal_links_count',
         'external_links_count',
         'broken_links_count',
@@ -38,6 +41,8 @@ class AuditResult extends Model
         'internal_links' => 'array',
         'external_links' => 'array',
         'broken_links' => 'array',
+        'keyword_density' => 'array',
+        'content_suggestions' => 'array',
         'ttfb' => 'decimal:3',
     ];
 

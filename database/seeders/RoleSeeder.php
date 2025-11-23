@@ -65,6 +65,12 @@ class RoleSeeder extends Seeder
                 'admin.competitors.dashboard' => 'Ver dashboard de competencia',
                 'admin.competitors.destroy' => 'Eliminar competidor',
             ],
+            'alerts' => [
+                'admin.alerts.index' => 'Lista de alertas SEO',
+                'admin.alerts.mark-as-read' => 'Marcar alerta como leída',
+                'admin.alerts.mark-as-resolved' => 'Marcar alerta como resuelta',
+                'admin.alerts.detect-changes' => 'Detectar cambios automáticamente',
+            ],
         ];
     }
 

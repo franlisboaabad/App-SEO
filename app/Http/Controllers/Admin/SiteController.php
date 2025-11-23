@@ -8,6 +8,8 @@ use App\Models\SeoAudit;
 use App\Jobs\SyncGoogleSearchConsoleMetrics;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Services\AlertService;
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 class SiteController extends Controller
@@ -247,6 +249,62 @@ class SiteController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error al encolar sincronización: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Validar sitemap.xml y robots.txt
+     */
+    public function validateTechnical(Site $site)
+    {
+        $alertService = new AlertService();
+        $results = [
+            'sitemap' => ['valid' => false, 'url' => '', 'message' => ''],
+            'robots' => ['valid' => false, 'url' => '', 'message' => ''],
+        ];
+
+        // Validar sitemap.xml
+        $sitemapUrl = "https://{$site->dominio_base}/sitemap.xml";
+        try {
+            $response = Http::timeout(10)->withoutVerifying()->get($sitemapUrl);
+            if ($response->successful()) {
+                $xml = @simplexml_load_string($response->body());
+                if ($xml !== false) {
+                    $results['sitemap'] = ['valid' => true, 'url' => $sitemapUrl, 'message' => 'Sitemap válido'];
+                } else {
+                    $results['sitemap'] = ['valid' => false, 'url' => $sitemapUrl, 'message' => 'Sitemap no es XML válido'];
+                    $alertService->createErrorAlert($site, $sitemapUrl, 'Sitemap inválido', 'El sitemap.xml no es un XML válido');
+                }
+            } else {
+                $results['sitemap'] = ['valid' => false, 'url' => $sitemapUrl, 'message' => 'Sitemap no encontrado (HTTP ' . $response->status() . ')'];
+                $alertService->createErrorAlert($site, $sitemapUrl, 'Sitemap no encontrado', 'El sitemap.xml no se encuentra o no es accesible');
+            }
+        } catch (\Exception $e) {
+            $results['sitemap'] = ['valid' => false, 'url' => $sitemapUrl, 'message' => 'Error al validar: ' . $e->getMessage()];
+            $alertService->createErrorAlert($site, $sitemapUrl, 'Error al validar sitemap', $e->getMessage());
+        }
+
+        // Validar robots.txt
+        $robotsUrl = "https://{$site->dominio_base}/robots.txt";
+        try {
+            $response = Http::timeout(10)->withoutVerifying()->get($robotsUrl);
+            if ($response->successful() && !empty(trim($response->body()))) {
+                $results['robots'] = ['valid' => true, 'url' => $robotsUrl, 'message' => 'Robots.txt válido'];
+            } else {
+                $results['robots'] = ['valid' => false, 'url' => $robotsUrl, 'message' => 'Robots.txt no encontrado o vacío'];
+                $alertService->createErrorAlert($site, $robotsUrl, 'Robots.txt no encontrado', 'El robots.txt no se encuentra o está vacío');
+            }
+        } catch (\Exception $e) {
+            $results['robots'] = ['valid' => false, 'url' => $robotsUrl, 'message' => 'Error al validar: ' . $e->getMessage()];
+            $alertService->createErrorAlert($site, $robotsUrl, 'Error al validar robots.txt', $e->getMessage());
+        }
+
+        $allValid = $results['sitemap']['valid'] && $results['robots']['valid'];
+
+        return back()->with($allValid ? 'success' : 'warning',
+            $allValid
+                ? 'Validación técnica completada. Sitemap y robots.txt son válidos.'
+                : 'Validación completada. Se encontraron problemas. Revisa las alertas.'
+        )->with('validation_results', $results);
     }
 
     /**

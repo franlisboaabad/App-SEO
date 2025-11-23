@@ -20,6 +20,17 @@ class Kernel extends ConsoleKernel
             ->dailyAt('02:00')
             ->withoutOverlapping()
             ->runInBackground();
+
+        // Detectar cambios de posición y tráfico diariamente
+        $schedule->call(function () {
+            $alertService = new \App\Services\AlertService();
+            $alertService->detectPositionChanges();
+            $alertService->detectTrafficDrops();
+        })->dailyAt('03:00');
+
+        // Validar sitemap y robots.txt semanalmente
+        $schedule->command('seo:validate-sitemap-robots')
+            ->weeklyOn(1, '04:00'); // Lunes a las 4 AM
     }
 
     /**

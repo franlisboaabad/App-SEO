@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\KeywordController;
 use App\Http\Controllers\Admin\SeoTaskController;
 use App\Http\Controllers\Admin\CompetitorController;
+use App\Http\Controllers\Admin\UserManualController;
+use App\Http\Controllers\Admin\SeoAlertController;
 use App\Http\Controllers\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +50,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Sincronizar métricas
     Route::post('sites/{site}/sync-metrics', [SiteController::class, 'syncMetrics'])->name('sites.sync-metrics');
 
+    // Validación técnica
+    Route::post('sites/{site}/validate-technical', [SiteController::class, 'validateTechnical'])->name('sites.validate-technical');
+
     // Rutas de auditorías SEO
     Route::post('sites/{site}/audit', [SeoAuditController::class, 'runAudit'])->name('sites.audit');
     Route::get('sites/{site}/audits', [SeoAuditController::class, 'index'])->name('sites.audits');
@@ -77,6 +82,17 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('competitors/{competitor}/compare-keywords', [CompetitorController::class, 'compareKeywords'])->name('competitors.compare-keywords');
     Route::post('competitors/{competitor}/update-position', [CompetitorController::class, 'updatePosition'])->name('competitors.update-position');
     Route::post('competitors/{competitor}/update-positions', [CompetitorController::class, 'updatePositions'])->name('competitors.update-positions');
+
+    // Manual de Usuario
+    Route::get('user-manual', [UserManualController::class, 'index'])->name('user-manual.index');
+
+    // Rutas de Alertas SEO
+    Route::get('alerts', [SeoAlertController::class, 'index'])->name('alerts.index');
+    Route::post('alerts/{alert}/mark-as-read', [SeoAlertController::class, 'markAsRead'])->name('alerts.mark-as-read');
+    Route::post('alerts/{alert}/mark-as-resolved', [SeoAlertController::class, 'markAsResolved'])->name('alerts.mark-as-resolved');
+    Route::post('alerts/mark-all-as-read', [SeoAlertController::class, 'markAllAsRead'])->name('alerts.mark-all-as-read');
+    Route::post('alerts/detect-changes', [SeoAlertController::class, 'detectChanges'])->name('alerts.detect-changes');
+    Route::get('alerts/unread-count', [SeoAlertController::class, 'getUnreadCount'])->name('alerts.unread-count');
 });
 
 

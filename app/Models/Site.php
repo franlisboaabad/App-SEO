@@ -63,6 +63,14 @@ class Site extends Model
     }
 
     /**
+     * Relación con alertas
+     */
+    public function alerts()
+    {
+        return $this->hasMany(\App\Models\SeoAlert::class);
+    }
+
+    /**
      * Scope para sitios activos
      */
     public function scopeActive($query)
