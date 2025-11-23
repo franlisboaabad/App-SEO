@@ -30,4 +30,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'pagespeed' => [
+        'api_key' => env('PAGESPEED_INSIGHTS_API_KEY'),
+    ],
+
 ];

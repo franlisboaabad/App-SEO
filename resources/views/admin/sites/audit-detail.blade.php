@@ -511,6 +511,306 @@
             </div>
         </div>
 
+        <!-- Análisis de Velocidad (PageSpeed Insights) -->
+        @if($result->pagespeed_score_mobile || $result->pagespeed_score_desktop)
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-info">
+                            <h3 class="card-title text-white">
+                                <i class="fas fa-tachometer-alt"></i> Análisis de Velocidad (PageSpeed Insights)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Scores Generales -->
+                            <div class="row mb-4">
+                                @if($result->pagespeed_score_mobile)
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header bg-primary">
+                                                <h4 class="card-title text-white text-center">
+                                                    <i class="fas fa-mobile-alt"></i> Mobile
+                                                </h4>
+                                            </div>
+                                            <div class="card-body text-center">
+                                                @php
+                                                    $mobileScore = $result->pagespeed_score_mobile;
+                                                    $mobileClass = $mobileScore >= 90 ? 'success' : ($mobileScore >= 50 ? 'warning' : 'danger');
+                                                @endphp
+                                                <h2 class="text-{{ $mobileClass }}">
+                                                    {{ $mobileScore }}/100
+                                                </h2>
+                                                <div class="progress mb-2" style="height: 25px;">
+                                                    <div class="progress-bar bg-{{ $mobileClass }} progress-bar-striped"
+                                                         role="progressbar"
+                                                         style="width: {{ $mobileScore }}%"
+                                                         aria-valuenow="{{ $mobileScore }}"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100">
+                                                        {{ $mobileScore }}%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($result->pagespeed_score_desktop)
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header bg-secondary">
+                                                <h4 class="card-title text-white text-center">
+                                                    <i class="fas fa-desktop"></i> Desktop
+                                                </h4>
+                                            </div>
+                                            <div class="card-body text-center">
+                                                @php
+                                                    $desktopScore = $result->pagespeed_score_desktop;
+                                                    $desktopClass = $desktopScore >= 90 ? 'success' : ($desktopScore >= 50 ? 'warning' : 'danger');
+                                                @endphp
+                                                <h2 class="text-{{ $desktopClass }}">
+                                                    {{ $desktopScore }}/100
+                                                </h2>
+                                                <div class="progress mb-2" style="height: 25px;">
+                                                    <div class="progress-bar bg-{{ $desktopClass }} progress-bar-striped"
+                                                         role="progressbar"
+                                                         style="width: {{ $desktopScore }}%"
+                                                         aria-valuenow="{{ $desktopScore }}"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="100">
+                                                        {{ $desktopScore }}%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Core Web Vitals -->
+                            <h4 class="mb-3"><i class="fas fa-chart-line"></i> Core Web Vitals</h4>
+                            <div class="row">
+                                <!-- Mobile Core Web Vitals -->
+                                @if($result->fcp_mobile || $result->lcp_mobile || $result->cls_mobile || $result->fid_mobile || $result->tti_mobile)
+                                    <div class="col-md-6">
+                                        <h5 class="text-primary"><i class="fas fa-mobile-alt"></i> Mobile</h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Métrica</th>
+                                                        <th>Valor</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if($result->fcp_mobile)
+                                                        <tr>
+                                                            <td><strong>FCP</strong><br><small>First Contentful Paint</small></td>
+                                                            <td>{{ number_format($result->fcp_mobile, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->fcp_mobile <= 1.8)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->fcp_mobile <= 3.0)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->lcp_mobile)
+                                                        <tr>
+                                                            <td><strong>LCP</strong><br><small>Largest Contentful Paint</small></td>
+                                                            <td>{{ number_format($result->lcp_mobile, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->lcp_mobile <= 2.5)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->lcp_mobile <= 4.0)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->cls_mobile !== null)
+                                                        <tr>
+                                                            <td><strong>CLS</strong><br><small>Cumulative Layout Shift</small></td>
+                                                            <td>{{ number_format($result->cls_mobile, 4) }}</td>
+                                                            <td>
+                                                                @if($result->cls_mobile <= 0.1)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->cls_mobile <= 0.25)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->fid_mobile)
+                                                        <tr>
+                                                            <td><strong>FID</strong><br><small>First Input Delay</small></td>
+                                                            <td>{{ number_format($result->fid_mobile, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->fid_mobile <= 0.1)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->fid_mobile <= 0.3)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->tti_mobile)
+                                                        <tr>
+                                                            <td><strong>TTI</strong><br><small>Time to Interactive</small></td>
+                                                            <td>{{ number_format($result->tti_mobile, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->tti_mobile <= 3.8)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->tti_mobile <= 7.3)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Desktop Core Web Vitals -->
+                                @if($result->fcp_desktop || $result->lcp_desktop || $result->cls_desktop || $result->fid_desktop || $result->tti_desktop)
+                                    <div class="col-md-6">
+                                        <h5 class="text-secondary"><i class="fas fa-desktop"></i> Desktop</h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Métrica</th>
+                                                        <th>Valor</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if($result->fcp_desktop)
+                                                        <tr>
+                                                            <td><strong>FCP</strong><br><small>First Contentful Paint</small></td>
+                                                            <td>{{ number_format($result->fcp_desktop, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->fcp_desktop <= 1.8)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->fcp_desktop <= 3.0)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->lcp_desktop)
+                                                        <tr>
+                                                            <td><strong>LCP</strong><br><small>Largest Contentful Paint</small></td>
+                                                            <td>{{ number_format($result->lcp_desktop, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->lcp_desktop <= 2.5)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->lcp_desktop <= 4.0)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->cls_desktop !== null)
+                                                        <tr>
+                                                            <td><strong>CLS</strong><br><small>Cumulative Layout Shift</small></td>
+                                                            <td>{{ number_format($result->cls_desktop, 4) }}</td>
+                                                            <td>
+                                                                @if($result->cls_desktop <= 0.1)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->cls_desktop <= 0.25)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->fid_desktop)
+                                                        <tr>
+                                                            <td><strong>FID</strong><br><small>First Input Delay</small></td>
+                                                            <td>{{ number_format($result->fid_desktop, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->fid_desktop <= 0.1)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->fid_desktop <= 0.3)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    @if($result->tti_desktop)
+                                                        <tr>
+                                                            <td><strong>TTI</strong><br><small>Time to Interactive</small></td>
+                                                            <td>{{ number_format($result->tti_desktop, 2) }}s</td>
+                                                            <td>
+                                                                @if($result->tti_desktop <= 3.8)
+                                                                    <span class="badge badge-success">Bueno</span>
+                                                                @elseif($result->tti_desktop <= 7.3)
+                                                                    <span class="badge badge-warning">Mejorable</span>
+                                                                @else
+                                                                    <span class="badge badge-danger">Lento</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Recomendaciones de Optimización -->
+                            @if(!empty($result->pagespeed_recommendations))
+                                <div class="mt-4">
+                                    <h4 class="mb-3"><i class="fas fa-lightbulb"></i> Recomendaciones de Optimización</h4>
+                                    <div class="row">
+                                        @foreach($result->pagespeed_recommendations as $recommendation)
+                                            <div class="col-md-6 mb-3">
+                                                <div class="card border-{{ $recommendation['impact'] == 'high' ? 'danger' : 'warning' }}">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">
+                                                            <i class="fas fa-{{ $recommendation['impact'] == 'high' ? 'exclamation-triangle text-danger' : 'info-circle text-warning' }}"></i>
+                                                            {{ $recommendation['title'] }}
+                                                        </h5>
+                                                        <p class="card-text text-muted small">{{ $recommendation['description'] ?? '' }}</p>
+                                                        <span class="badge badge-{{ $recommendation['impact'] == 'high' ? 'danger' : 'warning' }}">
+                                                            Score: {{ $recommendation['score'] }}/100
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Errores y Advertencias -->
         @if(count($result->errors ?? []) > 0 || count($result->warnings ?? []) > 0)
             <div class="row mt-3">

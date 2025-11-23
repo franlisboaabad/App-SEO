@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\CompetitorController;
 use App\Http\Controllers\Admin\UserManualController;
 use App\Http\Controllers\Admin\SeoAlertController;
 use App\Http\Controllers\Admin\KeywordResearchController;
+use App\Http\Controllers\Admin\SerpAnalysisController;
+use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -111,6 +113,15 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('alerts/mark-all-as-read', [SeoAlertController::class, 'markAllAsRead'])->name('alerts.mark-all-as-read');
     Route::post('alerts/detect-changes', [SeoAlertController::class, 'detectChanges'])->name('alerts.detect-changes');
     Route::get('alerts/unread-count', [SeoAlertController::class, 'getUnreadCount'])->name('alerts.unread-count');
+
+    // Rutas de Análisis SERP
+    Route::resource('serp-analysis', SerpAnalysisController::class);
+    Route::post('serp-analysis/{serpAnalysis}/reanalyze', [SerpAnalysisController::class, 'reanalyze'])->name('serp-analysis.reanalyze');
+    Route::post('sites/{site}/serp-analysis/analyze-keywords', [SerpAnalysisController::class, 'analyzeFromKeywords'])->name('serp-analysis.analyze-keywords');
+
+    // Rutas de Búsqueda Global
+    Route::get('search', [GlobalSearchController::class, 'search'])->name('global-search.search');
+    Route::get('search/autocomplete', [GlobalSearchController::class, 'autocomplete'])->name('global-search.autocomplete');
 });
 
 

@@ -364,6 +364,12 @@ return [
                     'icon' => 'fas fa-sitemap',
                     'can' => 'admin.keywords.index',
                 ],
+                [
+                    'text' => 'Análisis de SERP',
+                    'route'  => 'serp-analysis.index',
+                    'icon' => 'fas fa-list-ol',
+                    'can' => 'admin.keywords.index',
+                ],
             ],
         ],
         [
@@ -604,6 +610,16 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                ],
+            ],
+        ],
+        'GlobalSearch' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'js/global-search.js',
                 ],
             ],
         ],

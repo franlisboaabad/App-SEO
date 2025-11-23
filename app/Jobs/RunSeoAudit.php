@@ -39,6 +39,9 @@ class RunSeoAudit implements ShouldQueue
     public function handle(SeoAuditService $auditService)
     {
         try {
+            // Aumentar tiempo de ejecución para jobs (6 minutos)
+            set_time_limit(360);
+
             Log::info("Iniciando auditoría SEO para {$this->url} del sitio {$this->site->id}");
 
             // Ejecutar auditoría sin verificar links rotos (más rápido)

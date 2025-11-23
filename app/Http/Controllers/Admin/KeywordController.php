@@ -39,6 +39,19 @@ class KeywordController extends Controller
         $keywords = $query->latest()->paginate(20);
         $sites = Site::active()->get();
 
+        // Si se solicita formato JSON (para AJAX)
+        if ($request->get('format') === 'json') {
+            return response()->json([
+                'keywords' => $keywords->map(function($kw) {
+                    return [
+                        'id' => $kw->id,
+                        'keyword' => $kw->keyword,
+                        'current_position' => $kw->current_position,
+                    ];
+                }),
+            ]);
+        }
+
         return view('admin.keywords.index', compact('keywords', 'sites', 'siteId'));
     }
 

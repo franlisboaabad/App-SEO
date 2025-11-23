@@ -6,6 +6,7 @@ use App\Models\Site;
 use App\Models\SeoAudit;
 use App\Models\AuditResult;
 use App\Models\SeoTask;
+use App\Services\PageSpeedInsightsService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -79,6 +80,36 @@ class SeoAuditService
                     $result = $this->analyzePage($crawler, $url, $ttfb, $statusCode, $checkBrokenLinks);
                 } catch (\Exception $crawlerException) {
                     throw new Exception("Error al analizar el HTML: " . $crawlerException->getMessage());
+                }
+
+                // Analizar con PageSpeed Insights (opcional, puede fallar sin afectar la auditoría)
+                // IMPORTANTE: Solo analizar mobile para evitar timeouts (desktop es opcional y más lento)
+                try {
+                    $pagespeedService = new PageSpeedInsightsService();
+
+                    // Solo analizar mobile (más rápido, más importante para SEO móvil-first)
+                    // Desktop se puede agregar después si es necesario
+                    $mobile = $pagespeedService->analyzeUrl($url, 'mobile');
+
+                    if ($mobile && isset($mobile['metrics'])) {
+                        $result['pagespeed_score_mobile'] = $mobile['metrics']['score'] ?? null;
+                        $result['fcp_mobile'] = $mobile['metrics']['fcp'] ?? null;
+                        $result['lcp_mobile'] = $mobile['metrics']['lcp'] ?? null;
+                        $result['cls_mobile'] = $mobile['metrics']['cls'] ?? null;
+                        $result['fid_mobile'] = $mobile['metrics']['fid'] ?? null;
+                        $result['tti_mobile'] = $mobile['metrics']['tti'] ?? null;
+
+                        // Recomendaciones
+                        if (isset($mobile['recommendations'])) {
+                            $result['pagespeed_recommendations'] = $mobile['recommendations'];
+                        }
+                    }
+
+                    // Desktop se puede agregar después en un job separado si es necesario
+                    // Por ahora solo mobile para evitar timeouts
+                } catch (\Exception $pagespeedException) {
+                    // No fallar la auditoría si PageSpeed Insights falla o tarda mucho
+                    Log::warning("Error al obtener datos de PageSpeed Insights para {$url}: " . $pagespeedException->getMessage());
                 }
 
                 // Guardar resultados

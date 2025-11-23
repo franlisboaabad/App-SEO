@@ -22,11 +22,12 @@ class Kernel extends ConsoleKernel
             ->runInBackground();
 
         // Detectar cambios de posición y tráfico diariamente
-        $schedule->call(function () {
-            $alertService = new \App\Services\AlertService();
-            $alertService->detectPositionChanges();
-            $alertService->detectTrafficDrops();
-        })->dailyAt('03:00');
+        // DESACTIVADO: Ahora es manual desde la interfaz (botón "Detectar Cambios")
+        // $schedule->call(function () {
+        //     $alertService = new \App\Services\AlertService();
+        //     $alertService->detectPositionChanges();
+        //     $alertService->detectTrafficDrops();
+        // })->dailyAt('03:00');
 
         // Validar sitemap y robots.txt semanalmente
         $schedule->command('seo:validate-sitemap-robots')

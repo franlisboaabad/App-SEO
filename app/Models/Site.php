@@ -79,6 +79,14 @@ class Site extends Model
     }
 
     /**
+     * Relación con análisis de SERP
+     */
+    public function serpAnalyses()
+    {
+        return $this->hasMany(\App\Models\SerpAnalysis::class);
+    }
+
+    /**
      * Scope para sitios activos
      */
     public function scopeActive($query)

@@ -33,6 +33,20 @@ class AuditResult extends Model
         'status_code',
         'errors',
         'warnings',
+        // PageSpeed Insights
+        'pagespeed_score_mobile',
+        'pagespeed_score_desktop',
+        'fcp_mobile',
+        'lcp_mobile',
+        'cls_mobile',
+        'fid_mobile',
+        'tti_mobile',
+        'fcp_desktop',
+        'lcp_desktop',
+        'cls_desktop',
+        'fid_desktop',
+        'tti_desktop',
+        'pagespeed_recommendations',
     ];
 
     protected $casts = [
@@ -43,7 +57,18 @@ class AuditResult extends Model
         'broken_links' => 'array',
         'keyword_density' => 'array',
         'content_suggestions' => 'array',
+        'pagespeed_recommendations' => 'array',
         'ttfb' => 'decimal:3',
+        'fcp_mobile' => 'decimal:2',
+        'lcp_mobile' => 'decimal:2',
+        'cls_mobile' => 'decimal:4',
+        'fid_mobile' => 'decimal:2',
+        'tti_mobile' => 'decimal:2',
+        'fcp_desktop' => 'decimal:2',
+        'lcp_desktop' => 'decimal:2',
+        'cls_desktop' => 'decimal:4',
+        'fid_desktop' => 'decimal:2',
+        'tti_desktop' => 'decimal:2',
     ];
 
     /**
