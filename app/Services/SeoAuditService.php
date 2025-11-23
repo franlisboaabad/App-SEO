@@ -243,11 +243,25 @@ class SeoAuditService
             $result['word_count'] = $wordCount;
 
             // Análisis de densidad de keywords (extraer palabras más frecuentes)
-            $words = str_word_count(strtolower($fullText), 1, 'áéíóúñü');
+            // Limpiar y normalizar texto a UTF-8
+            $fullText = mb_convert_encoding($fullText, 'UTF-8', 'UTF-8');
+            $fullText = mb_convert_case($fullText, MB_CASE_LOWER, 'UTF-8');
+
+            // Extraer palabras usando regex para mejor soporte UTF-8
+            preg_match_all('/\b[\p{L}\p{M}]{3,}\b/u', $fullText, $matches);
+            $words = $matches[0] ?? [];
+
             // Filtrar palabras comunes (stop words en español)
             $stopWords = ['el', 'la', 'de', 'que', 'y', 'a', 'en', 'un', 'ser', 'se', 'no', 'haber', 'por', 'con', 'su', 'para', 'como', 'estar', 'tener', 'le', 'lo', 'todo', 'pero', 'más', 'hacer', 'o', 'poder', 'decir', 'este', 'ir', 'otro', 'ese', 'la', 'si', 'me', 'ya', 'ver', 'porque', 'dar', 'cuando', 'él', 'muy', 'sin', 'vez', 'mucho', 'saber', 'qué', 'sobre', 'mi', 'alguno', 'mismo', 'yo', 'también', 'hasta', 'año', 'dos', 'querer', 'entre', 'así', 'primero', 'desde', 'grande', 'eso', 'ni', 'nos', 'llegar', 'pasar', 'tiempo', 'ella', 'sí', 'día', 'uno', 'bien', 'poco', 'deber', 'entonces', 'poner', 'cosa', 'tanto', 'hombre', 'parecer', 'nuestro', 'tan', 'donde', 'ahora', 'parte', 'después', 'vida', 'quedar', 'siempre', 'creer', 'hablar', 'llevar', 'dejar', 'nada', 'cada', 'seguir', 'menos', 'nuevo', 'encontrar', 'algo', 'solo', 'mientras', 'poder', 'año', 'mil', 'hacer', 'aunque', 'menos', 'casa', 'trabajar', 'mujer', 'sin', 'seis', 'nunca', 'menos', 'mundo', 'hacer', 'año', 'mismo', 'año', 'año', 'año'];
             $filteredWords = array_filter($words, function($word) use ($stopWords) {
-                return strlen($word) > 3 && !in_array($word, $stopWords) && !is_numeric($word);
+                // Limpiar y validar UTF-8
+                $word = mb_convert_encoding($word, 'UTF-8', 'UTF-8');
+                $word = trim($word);
+                // Filtrar solo palabras válidas
+                return mb_strlen($word, 'UTF-8') > 3
+                    && !in_array($word, $stopWords)
+                    && !is_numeric($word)
+                    && mb_check_encoding($word, 'UTF-8');
             });
 
             $wordFreq = array_count_values($filteredWords);
@@ -257,10 +271,16 @@ class SeoAuditService
             // Calcular densidad (frecuencia / total palabras * 100)
             $keywordDensity = [];
             foreach ($topKeywords as $keyword => $freq) {
+                // Asegurar que la keyword es UTF-8 válida
+                $keyword = mb_convert_encoding($keyword, 'UTF-8', 'UTF-8');
+                if (!mb_check_encoding($keyword, 'UTF-8')) {
+                    continue; // Saltar keywords inválidas
+                }
+
                 $density = ($freq / $wordCount) * 100;
                 $keywordDensity[] = [
                     'keyword' => $keyword,
-                    'frequency' => $freq,
+                    'frequency' => (int)$freq,
                     'density' => round($density, 2),
                 ];
             }
@@ -283,18 +303,26 @@ class SeoAuditService
             // Verificar densidad de keywords principales
             if (!empty($keywordDensity)) {
                 $mainKeyword = $keywordDensity[0];
+                // Asegurar que el mensaje es UTF-8 válido
+                $keywordText = mb_convert_encoding($mainKeyword['keyword'], 'UTF-8', 'UTF-8');
                 if ($mainKeyword['density'] < 0.5) {
                     $suggestions[] = [
                         'type' => 'warning',
-                        'message' => "La densidad de la keyword principal '{$mainKeyword['keyword']}' es baja ({$mainKeyword['density']}%). Se recomienda 1-2%.",
+                        'message' => "La densidad de la keyword principal '{$keywordText}' es baja ({$mainKeyword['density']}%). Se recomienda 1-2%.",
                     ];
                 } elseif ($mainKeyword['density'] > 3) {
                     $suggestions[] = [
                         'type' => 'warning',
-                        'message' => "La densidad de la keyword '{$mainKeyword['keyword']}' es muy alta ({$mainKeyword['density']}%). Puede ser considerado keyword stuffing.",
+                        'message' => "La densidad de la keyword '{$keywordText}' es muy alta ({$mainKeyword['density']}%). Puede ser considerado keyword stuffing.",
                     ];
                 }
             }
+
+            // Asegurar que todas las sugerencias son UTF-8 válidas
+            foreach ($suggestions as &$suggestion) {
+                $suggestion['message'] = mb_convert_encoding($suggestion['message'], 'UTF-8', 'UTF-8');
+            }
+            unset($suggestion);
 
             $result['content_suggestions'] = $suggestions;
         } catch (Exception $e) {

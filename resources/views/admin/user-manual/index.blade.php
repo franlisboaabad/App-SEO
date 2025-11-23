@@ -45,6 +45,21 @@
                         <i class="fas fa-file-pdf"></i> Reportes
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="daily-tasks-tab" data-toggle="tab" href="#daily-tasks" role="tab">
+                        <i class="fas fa-calendar-day"></i> Tareas Diarias
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="alerts-tab" data-toggle="tab" href="#alerts" role="tab">
+                        <i class="fas fa-bell"></i> Alertas SEO
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="keyword-research-tab" data-toggle="tab" href="#keyword-research" role="tab">
+                        <i class="fas fa-search"></i> Investigación Keywords
+                    </a>
+                </li>
             </ul>
         </div>
         <div class="card-body">
@@ -60,8 +75,11 @@
                         <li><strong>Integración con Google Search Console:</strong> Sincroniza métricas automáticamente</li>
                         <li><strong>Auditorías SEO On-Page:</strong> Analiza páginas web en busca de problemas SEO</li>
                         <li><strong>Tracking de Keywords:</strong> Monitorea posiciones de palabras clave</li>
+                        <li><strong>Investigación de Keywords:</strong> Encuentra nuevas keywords para posicionar</li>
                         <li><strong>Análisis de Competencia:</strong> Compara tu rendimiento con competidores</li>
                         <li><strong>Planificador de Tareas:</strong> Organiza y gestiona tareas SEO</li>
+                        <li><strong>Sistema de Alertas:</strong> Detecta problemas automáticamente</li>
+                        <li><strong>Validación Técnica:</strong> Valida sitemap.xml y robots.txt</li>
                         <li><strong>Reportes PDF:</strong> Exporta reportes completos en formato PDF</li>
                     </ul>
 
@@ -143,6 +161,7 @@
                         <li><strong>Canonical:</strong> Verifica presencia de canonical</li>
                         <li><strong>Robots Meta:</strong> Verifica directivas robots</li>
                         <li><strong>TTFB:</strong> Mide tiempo de respuesta del servidor</li>
+                        <li><strong>Análisis de Contenido:</strong> Cuenta palabras, analiza densidad de keywords, sugiere mejoras</li>
                     </ul>
 
                     <h4 class="mt-4">Ver Resultados de Auditoría</h4>
@@ -336,6 +355,217 @@
                         <li>Links rotos a Excel</li>
                     </ul>
                     <p>Cada exportación incluye: URL, Texto del Link, Href Original y Status Code (para rotos).</p>
+                </div>
+                <div class="tab-pane fade" id="daily-tasks" role="tabpanel">
+                    <h3><i class="fas fa-calendar-day"></i> Tareas Diarias como Auxiliar SEO</h3>
+                    <p>Esta sección explica cómo el software te ayuda con tus tareas diarias.</p>
+
+                    <h4 class="mt-4">🌅 Rutina Matutina (9:00 AM - 10:00 AM)</h4>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>1. Revisar Alertas y Notificaciones</h5>
+                            <p><strong>Módulo:</strong> Alertas SEO</p>
+                            <p>El sistema te alerta automáticamente cuando:</p>
+                            <ul>
+                                <li>Una keyword pierde más de 5 posiciones</li>
+                                <li>Hay caídas de tráfico > 20%</li>
+                                <li>Se detectan nuevos errores SEO</li>
+                                <li>Problemas de contenido (páginas muy cortas)</li>
+                            </ul>
+                            <p><strong>Ahorro de tiempo:</strong> 30 min → 5 min</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>2. Revisar Métricas del Día Anterior</h5>
+                            <p><strong>Módulo:</strong> Dashboard SEO por Sitio</p>
+                            <p>Ves automáticamente:</p>
+                            <ul>
+                                <li>Gráficos de evolución de clicks, impresiones, CTR, posición</li>
+                                <li>Comparación con período anterior</li>
+                                <li>Top URLs y keywords por rendimiento</li>
+                            </ul>
+                            <p><strong>Ahorro de tiempo:</strong> 20 min → 3 min</p>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">🔍 Investigación y Análisis (10:00 AM - 12:00 PM)</h4>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>3. Investigación de Keywords</h5>
+                            <p><strong>Módulo:</strong> Investigación de Keywords</p>
+                            <p>Funcionalidades:</p>
+                            <ul>
+                                <li><strong>Desde GSC:</strong> Encuentra keywords que ya rankean pero no estás trackeando</li>
+                                <li><strong>Autocomplete:</strong> Obtiene sugerencias relacionadas de Google</li>
+                                <li><strong>Análisis de intención:</strong> Identifica si es informativa, comercial, transaccional</li>
+                                <li><strong>Agregar al tracking:</strong> Con un clic agregas keywords prometedoras</li>
+                            </ul>
+                            <p><strong>Ahorro de tiempo:</strong> 1 hora → 15 min</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>4. Análisis de Competencia</h5>
+                            <p><strong>Módulo:</strong> Análisis de Competencia</p>
+                            <p>Compara automáticamente:</p>
+                            <ul>
+                                <li>Posiciones de tus keywords vs competidores</li>
+                                <li>Identifica gaps (keywords donde están mejor)</li>
+                                <li>Dashboard visual de comparación</li>
+                            </ul>
+                            <p><strong>Ahorro de tiempo:</strong> 45 min → 10 min</p>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">⚙️ Optimización Técnica (12:00 PM - 2:00 PM)</h4>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>5. Auditorías SEO On-Page</h5>
+                            <p><strong>Módulo:</strong> Auditorías SEO</p>
+                            <p>Analiza automáticamente:</p>
+                            <ul>
+                                <li>Title, meta description, H1/H2/H3</li>
+                                <li>Imágenes sin ALT</li>
+                                <li>Links internos, externos y rotos</li>
+                                <li>Análisis de contenido (palabras, densidad keywords)</li>
+                            </ul>
+                            <p><strong>Ahorro de tiempo:</strong> 2 horas → 30 min</p>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">📊 Seguimiento (2:00 PM - 4:00 PM)</h4>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>6. Tracking de Keywords</h5>
+                            <p><strong>Módulo:</strong> Tracking de Keywords</p>
+                            <p>Funcionalidades:</p>
+                            <ul>
+                                <li>Botón "Actualizar Posiciones" actualiza todas las keywords</li>
+                                <li>Dashboard por keyword con gráfico de evolución</li>
+                                <li>Comparación diaria/semanal automática</li>
+                                <li>Alertas cuando hay cambios significativos</li>
+                            </ul>
+                            <p><strong>Ahorro de tiempo:</strong> 1 hora → 5 min</p>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">📈 Resumen de Ahorro de Tiempo</h4>
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-clock"></i> Tiempo Total</h5>
+                        <ul>
+                            <li><strong>Antes:</strong> ~8 horas diarias</li>
+                            <li><strong>Con el software:</strong> ~2 horas diarias</li>
+                            <li><strong>Ahorro:</strong> ~75% del tiempo</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="mt-4">🎯 Flujo de Trabajo Diario Recomendado</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <pre style="background: #f4f4f4; padding: 15px; border-radius: 5px; white-space: pre-wrap;">9:00 AM  → Alertas SEO (5 min)
+9:30 AM  → Dashboard Métricas (3 min)
+10:00 AM → Investigar Keywords (15 min)
+10:30 AM → Analizar Competencia (10 min)
+11:00 AM → Ejecutar Auditorías (30 min)
+2:00 PM  → Actualizar Keywords (5 min)
+3:00 PM  → Revisar Tareas Kanban (10 min)
+4:00 PM  → Generar Reportes si necesario (5 min)
+
+Total: ~1.5 horas de trabajo activo</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="alerts" role="tabpanel">
+                    <h3><i class="fas fa-bell"></i> Sistema de Alertas SEO</h3>
+                    <p>El sistema detecta automáticamente problemas y cambios importantes.</p>
+
+                    <h4 class="mt-4">Tipos de Alertas</h4>
+                    <ul>
+                        <li><strong>Posición:</strong> Cuando una keyword pierde más de 5 posiciones</li>
+                        <li><strong>Tráfico:</strong> Cuando hay caídas de tráfico > 20%</li>
+                        <li><strong>Error:</strong> Cuando se detectan nuevos errores SEO</li>
+                        <li><strong>Contenido:</strong> Problemas de contenido (páginas muy cortas, densidad baja)</li>
+                        <li><strong>Rendimiento:</strong> Problemas de velocidad o TTFB</li>
+                        <li><strong>Indexación:</strong> Problemas con sitemap o robots.txt</li>
+                    </ul>
+
+                    <h4 class="mt-4">Cómo Usar</h4>
+                    <ol>
+                        <li>Ve a "Alertas SEO" en el menú</li>
+                        <li>Revisa las alertas no leídas</li>
+                        <li>Filtra por tipo, severidad o sitio</li>
+                        <li>Marca como leída o resuelta cuando termines</li>
+                        <li>Usa "Detectar Cambios" para buscar nuevos problemas</li>
+                    </ol>
+
+                    <h4 class="mt-4">Detección Automática</h4>
+                    <p>El sistema ejecuta automáticamente:</p>
+                    <ul>
+                        <li><strong>Diario 3:00 AM:</strong> Detecta cambios de posición y tráfico</li>
+                        <li><strong>Semanal (Lunes 4:00 AM):</strong> Valida sitemap y robots.txt</li>
+                    </ul>
+                </div>
+                <div class="tab-pane fade" id="keyword-research" role="tabpanel">
+                    <h3><i class="fas fa-search"></i> Investigación de Keywords</h3>
+                    <p>Encuentra nuevas keywords para posicionar y analiza oportunidades.</p>
+
+                    <h4 class="mt-4">Fuentes de Investigación</h4>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>1. Desde Google Search Console</h5>
+                            <p>Encuentra keywords que ya están rankeando pero no estás trackeando.</p>
+                            <ol>
+                                <li>Selecciona un sitio</li>
+                                <li>Haz clic en "Buscar desde GSC"</li>
+                                <li>El sistema muestra keywords con posición, clics e impresiones</li>
+                                <li>Agrega las mejores al tracking con un clic</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>2. Google Autocomplete</h5>
+                            <p>Obtiene sugerencias de búsqueda relacionadas.</p>
+                            <ol>
+                                <li>Escribe una keyword semilla (ej: "hoteles en lima")</li>
+                                <li>Haz clic en "Buscar Sugerencias"</li>
+                                <li>El sistema obtiene sugerencias de Google</li>
+                                <li>Analiza intención automáticamente</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <h4 class="mt-4">Análisis de Keywords</h4>
+                    <p>Cada keyword encontrada muestra:</p>
+                    <ul>
+                        <li><strong>Intención:</strong> Informativa, Comercial, Transaccional, Navegacional</li>
+                        <li><strong>Posición actual:</strong> Si tu sitio ya rankea para esa keyword</li>
+                        <li><strong>Clics e Impresiones:</strong> Datos desde GSC (si aplica)</li>
+                        <li><strong>Volumen:</strong> Estimado (puedes editarlo manualmente)</li>
+                        <li><strong>Dificultad:</strong> Fácil, Media o Difícil</li>
+                    </ul>
+
+                    <h4 class="mt-4">Agregar al Tracking</h4>
+                    <ol>
+                        <li>Revisa las keywords encontradas</li>
+                        <li>Haz clic en el botón "+" (verde) para agregar al tracking</li>
+                        <li>La keyword se agregará automáticamente a tu lista de keywords</li>
+                        <li>El sistema comenzará a trackear su posición</li>
+                    </ol>
+
+                    <h4 class="mt-4">Filtros y Búsqueda</h4>
+                    <p>Puedes filtrar por:</p>
+                    <ul>
+                        <li>Sitio</li>
+                        <li>Fuente (GSC, Autocomplete, Manual)</li>
+                        <li>Intención</li>
+                        <li>Solo no trackeadas</li>
+                    </ul>
+                    <p>La tabla usa DataTables para búsqueda y ordenamiento rápido.</p>
                 </div>
             </div>
         </div>

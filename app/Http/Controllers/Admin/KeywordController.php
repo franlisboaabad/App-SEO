@@ -6,8 +6,11 @@ use App\Models\Site;
 use App\Models\Keyword;
 use App\Models\SeoMetric;
 use App\Http\Controllers\Controller;
+use App\Exports\KeywordsExport;
+use App\Services\AlertService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KeywordController extends Controller
 {
@@ -246,6 +249,18 @@ class KeywordController extends Controller
         }
 
         return back()->with('success', "Se actualizaron {$updated} keywords.");
+    }
+
+    /**
+     * Exportar keywords a Excel
+     */
+    public function export(Request $request)
+    {
+        $siteId = $request->get('site_id');
+        $siteName = $siteId ? Site::find($siteId)->nombre ?? 'Todos' : 'Todos';
+        $filename = 'keywords_' . str_replace(' ', '_', $siteName) . '_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new KeywordsExport($siteId), $filename);
     }
 
     /**

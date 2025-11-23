@@ -11,12 +11,15 @@
             <a href="{{ route('keywords.create', ['site_id' => $siteId]) }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Nueva Keyword
             </a>
+            <a href="{{ route('keywords.export', ['site_id' => $siteId]) }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </a>
             <form action="{{ route('keywords.update-positions') }}" method="POST" class="d-inline">
                 @csrf
                 @if($siteId)
                     <input type="hidden" name="site_id" value="{{ $siteId }}">
                 @endif
-                <button type="submit" class="btn btn-success">
+                <button type="submit" class="btn btn-info">
                     <i class="fas fa-sync"></i> Actualizar Posiciones
                 </button>
             </form>

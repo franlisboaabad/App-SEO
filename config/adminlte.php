@@ -358,6 +358,12 @@ return [
                     'icon' => 'fas fa-search',
                     'can' => 'admin.keywords.index',
                 ],
+                [
+                    'text' => 'Clusters de Keywords',
+                    'route'  => 'keyword-research.clusters',
+                    'icon' => 'fas fa-sitemap',
+                    'can' => 'admin.keywords.index',
+                ],
             ],
         ],
         [

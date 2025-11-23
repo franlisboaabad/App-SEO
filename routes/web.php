@@ -54,6 +54,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Validación técnica
     Route::post('sites/{site}/validate-technical', [SiteController::class, 'validateTechnical'])->name('sites.validate-technical');
 
+    // Exportar métricas
+    Route::get('sites/{site}/export-metrics', [SiteController::class, 'exportMetrics'])->name('sites.export-metrics');
+
     // Rutas de auditorías SEO
     Route::post('sites/{site}/audit', [SeoAuditController::class, 'runAudit'])->name('sites.audit');
     Route::get('sites/{site}/audits', [SeoAuditController::class, 'index'])->name('sites.audits');
@@ -61,6 +64,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('audits/{audit}/export-internal-links', [SeoAuditController::class, 'exportInternalLinks'])->name('audits.export-internal-links');
     Route::get('audits/{audit}/export-external-links', [SeoAuditController::class, 'exportExternalLinks'])->name('audits.export-external-links');
     Route::get('audits/{audit}/export-broken-links', [SeoAuditController::class, 'exportBrokenLinks'])->name('audits.export-broken-links');
+    Route::get('audits/export/results', [SeoAuditController::class, 'exportResults'])->name('audits.export-results');
 
     // Rutas de reportes PDF
     Route::get('sites/{site}/report', [ReportController::class, 'siteReport'])->name('sites.report');
@@ -71,14 +75,19 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('keywords', KeywordController::class);
     Route::get('keywords/{keyword}/dashboard', [KeywordController::class, 'dashboard'])->name('keywords.dashboard');
     Route::post('keywords/update-positions', [KeywordController::class, 'updatePositions'])->name('keywords.update-positions');
+    Route::get('keywords/export/excel', [KeywordController::class, 'export'])->name('keywords.export');
 
     // Rutas de Investigación de Keywords
     Route::get('keyword-research', [KeywordResearchController::class, 'index'])->name('keyword-research.index');
+    Route::get('keyword-research/clusters', [KeywordResearchController::class, 'clusters'])->name('keyword-research.clusters');
     Route::post('keyword-research/search-gsc', [KeywordResearchController::class, 'searchFromGSC'])->name('keyword-research.search-gsc');
     Route::post('keyword-research/search-related', [KeywordResearchController::class, 'searchRelated'])->name('keyword-research.search-related');
+    Route::post('keyword-research/{site}/assign-clusters', [KeywordResearchController::class, 'assignClusters'])->name('keyword-research.assign-clusters');
+    Route::post('keyword-research/{site}/analyze-intent', [KeywordResearchController::class, 'analyzeIntent'])->name('keyword-research.analyze-intent');
     Route::post('keyword-research/{keywordResearch}/add-to-tracking', [KeywordResearchController::class, 'addToTracking'])->name('keyword-research.add-to-tracking');
     Route::put('keyword-research/{keywordResearch}', [KeywordResearchController::class, 'update'])->name('keyword-research.update');
     Route::delete('keyword-research/{keywordResearch}', [KeywordResearchController::class, 'destroy'])->name('keyword-research.destroy');
+    Route::get('keyword-research/export/excel', [KeywordResearchController::class, 'export'])->name('keyword-research.export');
 
     // Rutas de Tareas SEO
     Route::resource('tasks', SeoTaskController::class);

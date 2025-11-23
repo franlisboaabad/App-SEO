@@ -49,6 +49,7 @@ class KeywordResearchService
                     'ctr' => round($metric->avg_ctr, 2),
                     'source' => 'gsc',
                     'intent' => $this->detectIntent($metric->keyword),
+                    'cluster' => $this->detectCluster($metric->keyword),
                 ]
             );
 
@@ -104,6 +105,7 @@ class KeywordResearchService
                 [
                     'source' => 'autocomplete',
                     'intent' => $this->detectIntent($suggestion),
+                    'cluster' => $this->detectCluster($suggestion),
                     'notes' => "Sugerencia de: {$seedKeyword}",
                 ]
             );
@@ -123,6 +125,7 @@ class KeywordResearchService
                             [
                                 'source' => 'autocomplete',
                                 'intent' => $this->detectIntent($subSuggestion),
+                                'cluster' => $this->detectCluster($subSuggestion),
                                 'notes' => "Sugerencia de: {$suggestion}",
                             ]
                         );
@@ -146,38 +149,155 @@ class KeywordResearchService
     }
 
     /**
-     * Detectar intención de búsqueda basada en palabras clave
+     * Detectar intención de búsqueda basada en palabras clave (mejorado)
      */
-    private function detectIntent($keyword)
+    public function detectIntent($keyword)
     {
-        $keywordLower = strtolower($keyword);
+        $keywordLower = mb_strtolower($keyword, 'UTF-8');
 
-        // Palabras transaccionales
-        $transactional = ['comprar', 'precio', 'costo', 'barato', 'oferta', 'descuento', 'venta', 'comprar', 'adquirir'];
+        // Palabras transaccionales (alta intención de compra)
+        $transactional = ['comprar', 'precio', 'costo', 'barato', 'oferta', 'descuento', 'venta', 'adquirir', 'pedir', 'ordenar', 'pagar', 'carrito', 'checkout', 'comprar online', 'comprar ahora'];
         foreach ($transactional as $word) {
-            if (strpos($keywordLower, $word) !== false) {
+            if (mb_strpos($keywordLower, $word, 0, 'UTF-8') !== false) {
                 return 'transactional';
             }
         }
 
-        // Palabras comerciales
-        $commercial = ['mejor', 'comparar', 'vs', 'versus', 'revisión', 'review', 'opinión'];
+        // Palabras comerciales (intención de comparar/investigar antes de comprar)
+        $commercial = ['mejor', 'comparar', 'vs', 'versus', 'revisión', 'review', 'opinión', 'comparativa', 'top', 'ranking', 'guía', 'guia', 'cuál', 'cual', 'qué', 'que'];
         foreach ($commercial as $word) {
-            if (strpos($keywordLower, $word) !== false) {
+            if (mb_strpos($keywordLower, $word, 0, 'UTF-8') !== false) {
                 return 'commercial';
             }
         }
 
-        // Palabras navegacionales
-        $navigational = ['login', 'inicio', 'home', 'página', 'sitio', 'web'];
+        // Palabras navegacionales (buscar sitio específico)
+        $navigational = ['login', 'inicio', 'home', 'página', 'sitio', 'web', 'oficial', 'página web'];
         foreach ($navigational as $word) {
-            if (strpos($keywordLower, $word) !== false) {
+            if (mb_strpos($keywordLower, $word, 0, 'UTF-8') !== false) {
                 return 'navigational';
+            }
+        }
+
+        // Palabras informacionales (aprender, entender)
+        $informational = ['qué es', 'que es', 'cómo', 'como', 'qué son', 'que son', 'definición', 'definicion', 'significado', 'qué significa', 'que significa', 'tutorial', 'aprender', 'información', 'informacion'];
+        foreach ($informational as $word) {
+            if (mb_strpos($keywordLower, $word, 0, 'UTF-8') !== false) {
+                return 'informational';
             }
         }
 
         // Por defecto, informacional
         return 'informational';
+    }
+
+    /**
+     * Agrupar keywords en clusters/temas
+     */
+    public function groupIntoClusters($keywords)
+    {
+        $clusters = [];
+
+        foreach ($keywords as $keyword) {
+            $cluster = $this->detectCluster($keyword);
+
+            if (!isset($clusters[$cluster])) {
+                $clusters[$cluster] = [];
+            }
+
+            $clusters[$cluster][] = $keyword;
+        }
+
+        return $clusters;
+    }
+
+    /**
+     * Detectar cluster/tema de una keyword
+     */
+    private function detectCluster($keyword)
+    {
+        $keywordLower = mb_strtolower($keyword, 'UTF-8');
+
+        // Extraer palabra principal (primera palabra significativa)
+        $words = explode(' ', $keywordLower);
+        $mainWord = '';
+
+        $stopWords = ['el', 'la', 'de', 'que', 'y', 'a', 'en', 'un', 'para', 'con', 'por', 'del', 'los', 'las'];
+
+        foreach ($words as $word) {
+            $word = trim($word);
+            if (mb_strlen($word, 'UTF-8') > 3 && !in_array($word, $stopWords)) {
+                $mainWord = $word;
+                break;
+            }
+        }
+
+        // Si no encontramos palabra principal, usar la primera palabra
+        if (empty($mainWord) && !empty($words)) {
+            $mainWord = $words[0];
+        }
+
+        return ucfirst($mainWord ?: 'General');
+    }
+
+    /**
+     * Obtener datos de Google Trends (básico, sin API oficial)
+     * Nota: Google Trends no tiene API pública gratuita, esto es una aproximación
+     */
+    public function getTrendData($keyword)
+    {
+        // Google Trends no tiene API pública fácil
+        // Esta función retorna un score estimado basado en análisis básico
+        // Para datos reales, necesitarías usar la API no oficial o scraping
+
+        // Por ahora, retornamos un score estimado
+        $wordCount = str_word_count($keyword);
+        $length = strlen($keyword);
+
+        // Keywords más cortas y genéricas suelen tener más tendencia
+        if ($wordCount == 1 && $length < 8) {
+            return ['score' => rand(70, 100), 'trend' => 'up'];
+        } elseif ($wordCount <= 2) {
+            return ['score' => rand(40, 70), 'trend' => 'stable'];
+        } else {
+            return ['score' => rand(10, 40), 'trend' => 'down'];
+        }
+    }
+
+    /**
+     * Buscar keywords relacionadas con mejor intención
+     * Filtra keywords con buena intención de búsqueda (comprar, comparar, aprender)
+     */
+    public function filterByGoodIntent($keywords)
+    {
+        $goodIntents = ['transactional', 'commercial', 'informational'];
+
+        return array_filter($keywords, function($keyword) use ($goodIntents) {
+            if (is_object($keyword)) {
+                return in_array($keyword->intent, $goodIntents);
+            }
+            return isset($keyword['intent']) && in_array($keyword['intent'], $goodIntents);
+        });
+    }
+
+    /**
+     * Analizar keywords y asignar clusters automáticamente
+     */
+    public function assignClusters(Site $site)
+    {
+        $keywords = KeywordResearch::where('site_id', $site->id)
+            ->whereNull('cluster')
+            ->get();
+
+        $updated = 0;
+
+        foreach ($keywords as $keyword) {
+            $cluster = $this->detectCluster($keyword->keyword);
+            $keyword->update(['cluster' => $cluster]);
+            $updated++;
+        }
+
+        return $updated;
     }
 
     /**

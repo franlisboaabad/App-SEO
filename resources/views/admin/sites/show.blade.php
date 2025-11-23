@@ -22,9 +22,27 @@
 @stop
 
 @section('content')
+    @if (session()->has('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> {{ session()->get('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    @if (session()->has('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> {{ session()->get('warning') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     @if (session()->has('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session()->get('error') }}
+            <i class="fas fa-times-circle"></i> {{ session()->get('error') }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -119,12 +137,15 @@
                     <button type="button" class="btn btn-success btn-block mb-2" data-toggle="modal" data-target="#syncMetricsModal">
                         <i class="fas fa-sync"></i> Sincronizar Métricas
                     </button>
-                    <form action="{{ route('sites.validate-technical', $site) }}" method="POST" class="d-inline-block w-100">
+                    <form action="{{ route('sites.validate-technical', $site) }}" method="POST" class="d-inline-block w-100" id="validateTechnicalForm">
                         @csrf
-                        <button type="submit" class="btn btn-warning btn-block mb-2">
+                        <button type="submit" class="btn btn-warning btn-block mb-2" id="validateTechnicalButton">
                             <i class="fas fa-check-circle"></i> Validar Sitemap/Robots
                         </button>
                     </form>
+                    <small class="text-muted d-block mb-2">
+                        <i class="fas fa-info-circle"></i> Valida que sitemap.xml y robots.txt existan y sean válidos
+                    </small>
                 </div>
             </div>
 
@@ -258,6 +279,13 @@
         // Mostrar mensaje de procesamiento al enviar auditoría
         $('#auditForm').on('submit', function() {
             $('#btnSubmitAudit').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Encolando...');
+        });
+
+        // Mostrar loading al validar sitemap/robots
+        $('#validateTechnicalForm').on('submit', function() {
+            const button = $('#validateTechnicalButton');
+            button.prop('disabled', true);
+            button.html('<i class="fas fa-spinner fa-spin"></i> Validando...');
         });
     </script>
 

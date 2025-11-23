@@ -11,6 +11,25 @@
         <div class="col-md">
             <h1><i class="fas fa-search"></i> Investigación de Keywords</h1>
         </div>
+        <div class="col-md text-right">
+            <a href="{{ route('keyword-research.export', ['site_id' => $siteId]) }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </a>
+            @if($siteId)
+                @php $site = \App\Models\Site::find($siteId); @endphp
+                @if($site)
+                    <form action="{{ route('keyword-research.assign-clusters', $site) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-info btn-sm">
+                            <i class="fas fa-layer-group"></i> Asignar Clusters
+                        </button>
+                    </form>
+                    <a href="{{ route('keyword-research.clusters', ['site_id' => $siteId]) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-sitemap"></i> Ver Clusters
+                    </a>
+                @endif
+            @endif
+        </div>
     </div>
 @stop
 
@@ -175,6 +194,7 @@
                         <th>Keyword</th>
                         <th>Sitio</th>
                         <th>Fuente</th>
+                        <th>Cluster/Tema</th>
                         <th>Intención</th>
                         <th>Posición</th>
                         <th>Clics</th>
@@ -196,6 +216,13 @@
                             </td>
                             <td>
                                 <span class="badge badge-secondary">{{ ucfirst($keyword->source) }}</span>
+                            </td>
+                            <td>
+                                @if($keyword->cluster)
+                                    <span class="badge badge-info">{{ $keyword->cluster }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                             <td>{!! $keyword->intent_badge !!}</td>
                             <td>
@@ -323,7 +350,7 @@
                 "pageLength": 10,
                 "order": [[0, "asc"]],
                 "columnDefs": [
-                    { "orderable": false, "targets": [10] } // Columna de acciones no ordenable
+                    { "orderable": false, "targets": [11] } // Columna de acciones no ordenable
                 ]
             });
 

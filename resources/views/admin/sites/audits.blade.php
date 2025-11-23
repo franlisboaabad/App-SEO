@@ -8,6 +8,9 @@
             <h1>Historial de Auditorías: {{ $site->nombre }}</h1>
         </div>
         <div class="col-md text-right">
+            <a href="{{ route('audits.export-results', ['site_id' => $site->id]) }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar Resultados a Excel
+            </a>
             <a href="{{ route('sites.show', $site) }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Volver al Sitio
             </a>

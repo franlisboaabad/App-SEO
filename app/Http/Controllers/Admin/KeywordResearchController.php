@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Site;
 use App\Models\KeywordResearch;
 use App\Services\KeywordResearchService;
+use App\Exports\KeywordResearchExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KeywordResearchController extends Controller
 {
@@ -147,5 +149,78 @@ class KeywordResearchController extends Controller
         $keywordResearch->delete();
 
         return back()->with('success', "Keyword '{$keyword}' eliminada de la investigación.");
+    }
+
+    /**
+     * Asignar clusters automáticamente
+     */
+    public function assignClusters(Request $request, Site $site)
+    {
+        $updated = $this->researchService->assignClusters($site);
+
+        return redirect()->route('keyword-research.index', ['site_id' => $site->id])
+            ->with('success', "Se asignaron clusters a {$updated} keywords.");
+    }
+
+    /**
+     * Vista de clusters
+     */
+    public function clusters(Request $request, Site $site = null)
+    {
+        $siteId = $request->get('site_id') ?? ($site ? $site->id : null);
+
+        $query = KeywordResearch::with('site');
+
+        if ($siteId) {
+            $query->where('site_id', $siteId);
+        }
+
+        $keywords = $query->whereNotNull('cluster')->get();
+
+        // Agrupar por cluster
+        $clusters = $keywords->groupBy('cluster')->map(function ($group) {
+            return [
+                'keywords' => $group,
+                'count' => $group->count(),
+                'avg_volume' => $group->avg('search_volume'),
+                'intents' => $group->pluck('intent')->unique()->values(),
+            ];
+        })->sortByDesc('count');
+
+        $sites = Site::active()->get();
+
+        return view('admin.keyword-research.clusters', compact('clusters', 'sites', 'siteId'));
+    }
+
+    /**
+     * Analizar intención de keywords
+     */
+    public function analyzeIntent(Request $request, Site $site)
+    {
+        $keywords = KeywordResearch::where('site_id', $site->id)
+            ->whereNull('intent')
+            ->get();
+
+        $updated = 0;
+        foreach ($keywords as $keyword) {
+            $intent = $this->researchService->detectIntent($keyword->keyword);
+            $keyword->update(['intent' => $intent]);
+            $updated++;
+        }
+
+        return redirect()->route('keyword-research.index', ['site_id' => $site->id])
+            ->with('success', "Se analizó la intención de {$updated} keywords.");
+    }
+
+    /**
+     * Exportar investigación de keywords a Excel
+     */
+    public function export(Request $request)
+    {
+        $siteId = $request->get('site_id');
+        $siteName = $siteId ? Site::find($siteId)->nombre ?? 'Todos' : 'Todos';
+        $filename = 'investigacion_keywords_' . str_replace(' ', '_', $siteName) . '_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new KeywordResearchExport($siteId), $filename);
     }
 }

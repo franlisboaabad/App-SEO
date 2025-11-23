@@ -6,6 +6,7 @@ use App\Models\Site;
 use App\Models\SeoAudit;
 use App\Jobs\RunSeoAudit;
 use App\Http\Controllers\Controller;
+use App\Exports\AuditResultExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -195,5 +196,17 @@ class SeoAuditController extends Controller
                 ];
             }
         }, "links_rotos_audit_{$audit->id}.xlsx");
+    }
+
+    /**
+     * Exportar resultados completos de auditorías a Excel
+     */
+    public function exportResults(Request $request)
+    {
+        $siteId = $request->get('site_id');
+        $siteName = $siteId ? Site::find($siteId)->nombre ?? 'Todos' : 'Todos';
+        $filename = 'auditorias_seo_' . str_replace(' ', '_', $siteName) . '_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new AuditResultExport($siteId), $filename);
     }
 }

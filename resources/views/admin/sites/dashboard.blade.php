@@ -8,6 +8,9 @@
             <h1>Dashboard SEO: {{ $site->nombre }}</h1>
         </div>
         <div class="col-md text-right">
+            <a href="{{ route('sites.export-metrics', $site) }}?start_date={{ $startDate }}&end_date={{ $endDate }}" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar Métricas a Excel
+            </a>
             <a href="{{ route('sites.report', $site) }}?days={{ $period }}" class="btn btn-danger" target="_blank">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
             </a>

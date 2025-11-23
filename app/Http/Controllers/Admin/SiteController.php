@@ -6,11 +6,13 @@ use App\Models\Site;
 use App\Models\SeoMetric;
 use App\Models\SeoAudit;
 use App\Jobs\SyncGoogleSearchConsoleMetrics;
+use App\Exports\SeoMetricsExport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\AlertService;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SiteController extends Controller
 {
@@ -305,6 +307,18 @@ class SiteController extends Controller
                 ? 'Validación técnica completada. Sitemap y robots.txt son válidos.'
                 : 'Validación completada. Se encontraron problemas. Revisa las alertas.'
         )->with('validation_results', $results);
+    }
+
+    /**
+     * Exportar métricas de GSC a Excel
+     */
+    public function exportMetrics(Site $site, Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->subDays(30)->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::yesterday()->format('Y-m-d'));
+        $filename = 'metricas_' . str_replace(' ', '_', $site->nombre) . '_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new SeoMetricsExport($site->id, $startDate, $endDate), $filename);
     }
 
     /**
