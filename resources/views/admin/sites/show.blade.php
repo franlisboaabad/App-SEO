@@ -105,6 +105,11 @@
                     <a href="{{ route('sites.dashboard', $site) }}" class="btn btn-primary btn-block mb-2">
                         <i class="fas fa-chart-line"></i> Ver Dashboard SEO
                     </a>
+                    @if($site->competitors()->active()->count() > 0)
+                        <a href="{{ route('competitors.dashboard', $site) }}" class="btn btn-warning btn-block mb-2">
+                            <i class="fas fa-users"></i> Análisis de Competencia
+                        </a>
+                    @endif
                     <button type="button" class="btn btn-info btn-block mb-2" data-toggle="modal" data-target="#auditModal">
                         <i class="fas fa-search"></i> Ejecutar Auditoría
                     </button>
@@ -150,7 +155,7 @@
                     <span>&times;</span>
                 </button>
             </div>
-            <form action="{{ route('sites.audit', $site) }}" method="POST">
+            <form action="{{ route('sites.audit', $site) }}" method="POST" id="auditForm">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
@@ -167,7 +172,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="btnSubmitAudit">
                         <i class="fas fa-search"></i> Ejecutar Auditoría
                     </button>
                 </div>
@@ -242,6 +247,11 @@
                 button.disabled = true;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
             }
+        });
+
+        // Mostrar mensaje de procesamiento al enviar auditoría
+        $('#auditForm').on('submit', function() {
+            $('#btnSubmitAudit').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Encolando...');
         });
     </script>
 @stop

@@ -39,6 +39,30 @@ class Site extends Model
     }
 
     /**
+     * Relación con keywords
+     */
+    public function keywords()
+    {
+        return $this->hasMany(\App\Models\Keyword::class);
+    }
+
+    /**
+     * Relación con tareas SEO
+     */
+    public function seoTasks()
+    {
+        return $this->hasMany(\App\Models\SeoTask::class);
+    }
+
+    /**
+     * Relación con competidores
+     */
+    public function competitors()
+    {
+        return $this->hasMany(\App\Models\Competitor::class);
+    }
+
+    /**
      * Scope para sitios activos
      */
     public function scopeActive($query)

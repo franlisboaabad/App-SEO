@@ -42,6 +42,29 @@ class RoleSeeder extends Seeder
                 'admin.audits.show' => 'Ver detalles de auditoría',
                 'admin.audits.run' => 'Ejecutar auditoría',
             ],
+            'keywords' => [
+                'admin.keywords.index' => 'Lista de keywords',
+                'admin.keywords.create' => 'Crear keyword',
+                'admin.keywords.edit' => 'Editar keyword',
+                'admin.keywords.show' => 'Ver detalles de keyword',
+                'admin.keywords.dashboard' => 'Ver dashboard de keyword',
+                'admin.keywords.destroy' => 'Eliminar keyword',
+            ],
+            'tasks' => [
+                'admin.tasks.index' => 'Lista de tareas',
+                'admin.tasks.create' => 'Crear tarea',
+                'admin.tasks.edit' => 'Editar tarea',
+                'admin.tasks.show' => 'Ver detalles de tarea',
+                'admin.tasks.destroy' => 'Eliminar tarea',
+            ],
+            'competitors' => [
+                'admin.competitors.index' => 'Lista de competidores',
+                'admin.competitors.create' => 'Crear competidor',
+                'admin.competitors.edit' => 'Editar competidor',
+                'admin.competitors.show' => 'Ver detalles de competidor',
+                'admin.competitors.dashboard' => 'Ver dashboard de competencia',
+                'admin.competitors.destroy' => 'Eliminar competidor',
+            ],
         ];
     }
 

@@ -333,6 +333,69 @@ return [
                 ],
             ],
         ],
+        [
+            'text'    => 'Keywords',
+            'icon'    => 'fas fa-key',
+            'can'     => 'admin.keywords.index',
+            'submenu' => [
+                [
+                    'text' => 'Lista de Keywords',
+                    'route'  => 'keywords.index',
+                    'icon' => 'fas fa-list',
+                    'can' => 'admin.keywords.index',
+                ],
+                [
+                    'text' => 'Nueva Keyword',
+                    'route'  => 'keywords.create',
+                    'icon' => 'fas fa-plus',
+                    'can' => 'admin.keywords.create',
+                ],
+            ],
+        ],
+        [
+            'text'    => 'Tareas SEO',
+            'icon'    => 'fas fa-tasks',
+            'can'     => 'admin.tasks.index',
+            'submenu' => [
+                [
+                    'text' => 'Vista Kanban',
+                    'route'  => 'tasks.kanban',
+                    'icon' => 'fas fa-th',
+                    'can' => 'admin.tasks.index',
+                ],
+                [
+                    'text' => 'Lista de Tareas',
+                    'route'  => 'tasks.index',
+                    'icon' => 'fas fa-list',
+                    'can' => 'admin.tasks.index',
+                ],
+                [
+                    'text' => 'Nueva Tarea',
+                    'route'  => 'tasks.create',
+                    'icon' => 'fas fa-plus',
+                    'can' => 'admin.tasks.create',
+                ],
+            ],
+        ],
+        [
+            'text'    => 'Competencia',
+            'icon'    => 'fas fa-users',
+            'can'     => 'admin.competitors.index',
+            'submenu' => [
+                [
+                    'text' => 'Lista de Competidores',
+                    'route'  => 'competitors.index',
+                    'icon' => 'fas fa-list',
+                    'can' => 'admin.competitors.index',
+                ],
+                [
+                    'text' => 'Nuevo Competidor',
+                    'route'  => 'competitors.create',
+                    'icon' => 'fas fa-plus',
+                    'can' => 'admin.competitors.create',
+                ],
+            ],
+        ],
 
         ['header' => 'account_settings'],
         [

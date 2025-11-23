@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\Admin\SeoAuditController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\KeywordController;
+use App\Http\Controllers\Admin\SeoTaskController;
+use App\Http\Controllers\Admin\CompetitorController;
 use App\Http\Controllers\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -49,11 +52,31 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('sites/{site}/audit', [SeoAuditController::class, 'runAudit'])->name('sites.audit');
     Route::get('sites/{site}/audits', [SeoAuditController::class, 'index'])->name('sites.audits');
     Route::get('audits/{audit}', [SeoAuditController::class, 'show'])->name('audits.show');
+    Route::get('audits/{audit}/export-internal-links', [SeoAuditController::class, 'exportInternalLinks'])->name('audits.export-internal-links');
+    Route::get('audits/{audit}/export-external-links', [SeoAuditController::class, 'exportExternalLinks'])->name('audits.export-external-links');
+    Route::get('audits/{audit}/export-broken-links', [SeoAuditController::class, 'exportBrokenLinks'])->name('audits.export-broken-links');
 
     // Rutas de reportes PDF
     Route::get('sites/{site}/report', [ReportController::class, 'siteReport'])->name('sites.report');
     Route::get('sites/{site}/metrics-report', [ReportController::class, 'metricsReport'])->name('sites.metrics-report');
     Route::get('audits/{audit}/report', [ReportController::class, 'auditReport'])->name('audits.report');
+
+    // Rutas de Keywords
+    Route::resource('keywords', KeywordController::class);
+    Route::get('keywords/{keyword}/dashboard', [KeywordController::class, 'dashboard'])->name('keywords.dashboard');
+    Route::post('keywords/update-positions', [KeywordController::class, 'updatePositions'])->name('keywords.update-positions');
+
+    // Rutas de Tareas SEO
+    Route::resource('tasks', SeoTaskController::class);
+    Route::get('tasks-kanban', [SeoTaskController::class, 'kanban'])->name('tasks.kanban');
+    Route::post('tasks/{task}/update-status', [SeoTaskController::class, 'updateStatus'])->name('tasks.update-status');
+
+    // Rutas de Competidores
+    Route::resource('competitors', CompetitorController::class);
+    Route::get('sites/{site}/competitors/dashboard', [CompetitorController::class, 'dashboard'])->name('competitors.dashboard');
+    Route::post('competitors/{competitor}/compare-keywords', [CompetitorController::class, 'compareKeywords'])->name('competitors.compare-keywords');
+    Route::post('competitors/{competitor}/update-position', [CompetitorController::class, 'updatePosition'])->name('competitors.update-position');
+    Route::post('competitors/{competitor}/update-positions', [CompetitorController::class, 'updatePositions'])->name('competitors.update-positions');
 });
 
 

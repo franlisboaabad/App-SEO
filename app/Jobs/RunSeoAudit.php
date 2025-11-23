@@ -40,8 +40,21 @@ class RunSeoAudit implements ShouldQueue
     {
         try {
             Log::info("Iniciando auditoría SEO para {$this->url} del sitio {$this->site->id}");
-            $auditService->auditUrl($this->site, $this->url);
+
+            // Ejecutar auditoría sin verificar links rotos (más rápido)
+            $audit = $auditService->auditUrl($this->site, $this->url, false);
+
             Log::info("Auditoría completada para {$this->url}");
+
+            // Si hay más de 30 links internos, verificar links rotos en segundo plano
+            if ($audit->result && count($audit->result->internal_links ?? []) > 30) {
+                Log::info("Encolando verificación de links rotos para auditoría {$audit->id} (más de 30 links)");
+                \App\Jobs\CheckBrokenLinks::dispatch($audit->id);
+            } elseif ($audit->result && count($audit->result->internal_links ?? []) > 0) {
+                // Si hay menos de 30 links, verificarlos inmediatamente
+                Log::info("Verificando links rotos inmediatamente para auditoría {$audit->id} (menos de 30 links)");
+                \App\Jobs\CheckBrokenLinks::dispatch($audit->id);
+            }
         } catch (\Exception $e) {
             Log::error("Error en auditoría SEO para {$this->url}: " . $e->getMessage());
             throw $e;

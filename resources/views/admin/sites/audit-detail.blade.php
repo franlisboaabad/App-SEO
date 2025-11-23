@@ -263,6 +263,158 @@
             </div>
         </div>
 
+        <!-- Tabs para Links -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header p-0">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="internal-links-tab" data-toggle="tab" href="#internal-links" role="tab">
+                                    <i class="fas fa-link"></i> Links Internos ({{ $result->internal_links_count }})
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="external-links-tab" data-toggle="tab" href="#external-links" role="tab">
+                                    <i class="fas fa-external-link-alt"></i> Links Externos ({{ $result->external_links_count }})
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="broken-links-tab" data-toggle="tab" href="#broken-links" role="tab">
+                                    <i class="fas fa-unlink"></i> Links Rotos ({{ $result->broken_links_count }})
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <!-- Tab Links Internos -->
+                            <div class="tab-pane fade show active" id="internal-links" role="tabpanel">
+                                <div class="mb-3">
+                                    <a href="{{ route('audits.export-internal-links', $audit) }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                                    </a>
+                                </div>
+                                <table class="table table-striped table-hover" id="table-internal-links">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>URL</th>
+                                            <th>Texto del Link</th>
+                                            <th>Href Original</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($result->internal_links ?? [] as $index => $link)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>
+                                                    <a href="{{ $link['url'] ?? '#' }}" target="_blank" rel="noopener">
+                                                        {{ Str::limit($link['url'] ?? '', 60) }}
+                                                        <i class="fas fa-external-link-alt ml-1"></i>
+                                                    </a>
+                                                </td>
+                                                <td>{{ $link['text'] ?? '(sin texto)' }}</td>
+                                                <td><code>{{ Str::limit($link['href'] ?? '', 50) }}</code></td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">No hay links internos</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Tab Links Externos -->
+                            <div class="tab-pane fade" id="external-links" role="tabpanel">
+                                <div class="mb-3">
+                                    <a href="{{ route('audits.export-external-links', $audit) }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                                    </a>
+                                </div>
+                                <table class="table table-striped table-hover" id="table-external-links">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>URL</th>
+                                            <th>Texto del Link</th>
+                                            <th>Href Original</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($result->external_links ?? [] as $index => $link)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>
+                                                    <a href="{{ $link['url'] ?? '#' }}" target="_blank" rel="noopener">
+                                                        {{ Str::limit($link['url'] ?? '', 60) }}
+                                                        <i class="fas fa-external-link-alt ml-1"></i>
+                                                    </a>
+                                                </td>
+                                                <td>{{ $link['text'] ?? '(sin texto)' }}</td>
+                                                <td><code>{{ Str::limit($link['href'] ?? '', 50) }}</code></td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">No hay links externos</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Tab Links Rotos -->
+                            <div class="tab-pane fade" id="broken-links" role="tabpanel">
+                                <div class="mb-3">
+                                    <a href="{{ route('audits.export-broken-links', $audit) }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                                    </a>
+                                </div>
+                                <table class="table table-striped table-hover" id="table-broken-links">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>URL</th>
+                                            <th>Texto del Link</th>
+                                            <th>Href Original</th>
+                                            <th>Status Code</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($result->broken_links ?? [] as $index => $link)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>
+                                                    <a href="{{ $link['url'] ?? '#' }}" target="_blank" rel="noopener">
+                                                        {{ Str::limit($link['url'] ?? '', 60) }}
+                                                        <i class="fas fa-external-link-alt ml-1"></i>
+                                                    </a>
+                                                </td>
+                                                <td>{{ $link['text'] ?? '(sin texto)' }}</td>
+                                                <td><code>{{ Str::limit($link['href'] ?? '', 50) }}</code></td>
+                                                <td>
+                                                    @if(isset($link['status_code']) && $link['status_code'] > 0)
+                                                        <span class="badge badge-danger">{{ $link['status_code'] }}</span>
+                                                    @else
+                                                        <span class="badge badge-secondary">Error</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">No hay links rotos</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Errores y Advertencias -->
         @if(count($result->errors ?? []) > 0 || count($result->warnings ?? []) > 0)
             <div class="row mt-3">
@@ -317,12 +469,51 @@
 @stop
 
 @section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="/css/admin_custom.css">
 @stop
 
 @section('js')
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
     <script>
-        console.log('Detalles de auditoría: {{ $audit->id }}');
+        $(document).ready(function() {
+            // DataTable para Links Internos
+            $('#table-internal-links').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "pageLength": 10,
+                "order": [[0, "asc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": [1, 2, 3] }
+                ]
+            });
+
+            // DataTable para Links Externos
+            $('#table-external-links').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "pageLength": 25,
+                "order": [[0, "asc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": [1, 2, 3] }
+                ]
+            });
+
+            // DataTable para Links Rotos
+            $('#table-broken-links').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "pageLength": 25,
+                "order": [[0, "asc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": [1, 2, 3, 4] }
+                ]
+            });
+        });
     </script>
 @stop
 

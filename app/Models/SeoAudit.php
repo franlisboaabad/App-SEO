@@ -37,6 +37,14 @@ class SeoAudit extends Model
     }
 
     /**
+     * Relación con tareas generadas
+     */
+    public function seoTasks()
+    {
+        return $this->hasMany(\App\Models\SeoTask::class);
+    }
+
+    /**
      * Scope para auditorías completadas
      */
     public function scopeCompleted($query)

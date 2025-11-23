@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\Site;
 use App\Models\SeoAudit;
 use App\Models\AuditResult;
+use App\Models\SeoTask;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler;
 use Exception;
 
@@ -14,8 +16,9 @@ class SeoAuditService
 {
     /**
      * Ejecutar auditoría SEO para una URL
+     * @param bool $checkBrokenLinks Si es true, verifica links rotos (puede ser lento)
      */
-    public function auditUrl(Site $site, $url)
+    public function auditUrl(Site $site, $url, $checkBrokenLinks = false)
     {
         try {
             // Normalizar URL
@@ -73,7 +76,7 @@ class SeoAuditService
                 // Analizar HTML
                 try {
                     $crawler = new Crawler($html);
-                    $result = $this->analyzePage($crawler, $url, $ttfb, $statusCode);
+                    $result = $this->analyzePage($crawler, $url, $ttfb, $statusCode, $checkBrokenLinks);
                 } catch (\Exception $crawlerException) {
                     throw new Exception("Error al analizar el HTML: " . $crawlerException->getMessage());
                 }
@@ -86,6 +89,9 @@ class SeoAuditService
 
                 // Actualizar estado de la auditoría
                 $audit->update(['status' => 'completed']);
+
+                // Generar tareas automáticamente desde errores y advertencias críticas
+                $this->generateTasksFromAudit($audit, $auditResult);
 
                 return $audit;
             } catch (Exception $e) {
@@ -103,8 +109,9 @@ class SeoAuditService
 
     /**
      * Analizar página HTML
+     * @param bool $checkBrokenLinks Si es true, verifica links rotos (puede ser lento)
      */
-    private function analyzePage(Crawler $crawler, $url, $ttfb, $statusCode)
+    private function analyzePage(Crawler $crawler, $url, $ttfb, $statusCode, $checkBrokenLinks = false)
     {
         $result = [
             'title' => null,
@@ -217,35 +224,51 @@ class SeoAuditService
             // Ignorar
         }
 
-        // Links
+        // Links - Guardar lista completa
+        $result['internal_links'] = [];
+        $result['external_links'] = [];
+        $result['broken_links'] = [];
+
         try {
             $links = $crawler->filter('a[href]');
-            $links->each(function (Crawler $link) use (&$result, $baseUrl, $url) {
+            $links->each(function (Crawler $link) use (&$result, $baseUrl, $url, $checkBrokenLinks) {
                 $href = $link->attr('href');
+                $text = trim($link->text());
                 if (empty($href)) {
                     return;
                 }
 
-                $parsedHref = parse_url($href);
+                // Normalizar URL
+                $fullUrl = $this->normalizeUrl($href, $baseUrl);
+                $parsedHref = parse_url($fullUrl);
                 $hrefHost = $parsedHref['host'] ?? null;
 
-                // Si es URL relativa, es interna
-                if (!isset($parsedHref['host'])) {
-                    $result['internal_links_count']++;
-                } elseif ($hrefHost === $baseUrl) {
-                    $result['internal_links_count']++;
-                } else {
-                    $result['external_links_count']++;
-                }
+                $linkData = [
+                    'url' => $fullUrl,
+                    'text' => $text ?: '(sin texto)',
+                    'href' => $href, // URL original
+                ];
 
-                // Verificar si el link está roto (solo para links internos)
+                // Si es URL relativa, es interna
                 if (!isset($parsedHref['host']) || $hrefHost === $baseUrl) {
-                    // Aquí podríamos hacer una verificación adicional, pero por ahora solo contamos
-                    // En una versión mejorada, podríamos hacer una petición HEAD para verificar
+                    $result['internal_links'][] = $linkData;
+                    $result['internal_links_count']++;
+
+                    // Solo verificar links rotos si se solicita (puede ser lento con muchos links)
+                    if ($checkBrokenLinks) {
+                        if ($this->checkBrokenLink($fullUrl)) {
+                            $linkData['status_code'] = $this->getLinkStatus($fullUrl);
+                            $result['broken_links'][] = $linkData;
+                            $result['broken_links_count']++;
+                        }
+                    }
+                } else {
+                    $result['external_links'][] = $linkData;
+                    $result['external_links_count']++;
                 }
             });
         } catch (Exception $e) {
-            // Ignorar
+            Log::warning("Error al procesar links: " . $e->getMessage());
         }
 
         return $result;
@@ -289,10 +312,127 @@ class SeoAuditService
     private function checkBrokenLink($url)
     {
         try {
-            $response = Http::timeout(10)->head($url);
+            $response = Http::timeout(10)
+                ->withoutVerifying()
+                ->head($url);
             return $response->status() >= 400;
         } catch (Exception $e) {
             return true; // Si hay error, consideramos el link como roto
+        }
+    }
+
+    /**
+     * Obtener status code de un link
+     */
+    private function getLinkStatus($url)
+    {
+        try {
+            $response = Http::timeout(10)
+                ->withoutVerifying()
+                ->head($url);
+            return $response->status();
+        } catch (Exception $e) {
+            return 0; // Error desconocido
+        }
+    }
+
+    /**
+     * Generar tareas automáticamente desde errores de auditoría
+     */
+    private function generateTasksFromAudit(SeoAudit $audit, AuditResult $result)
+    {
+        $errors = $result->errors ?? [];
+        $warnings = $result->warnings ?? [];
+        $tasksCreated = 0;
+
+        // Mapeo de errores a tareas
+        $errorTaskMap = [
+            'No se encontró el tag <title>' => [
+                'title' => 'Agregar título (title tag)',
+                'description' => 'La página no tiene título. Es crítico para SEO.',
+                'priority' => 'critical',
+            ],
+            'No se encontró ningún H1' => [
+                'title' => 'Agregar H1 a la página',
+                'description' => 'La página no tiene ningún encabezado H1. Es importante para SEO.',
+                'priority' => 'high',
+            ],
+        ];
+
+        // Crear tareas desde errores
+        foreach ($errors as $error) {
+            if (isset($errorTaskMap[$error])) {
+                $taskData = $errorTaskMap[$error];
+
+                // Verificar si ya existe una tarea similar para esta URL
+                $existingTask = SeoTask::where('site_id', $audit->site_id)
+                    ->where('url', $audit->url)
+                    ->where('title', 'like', '%' . $taskData['title'] . '%')
+                    ->where('status', '!=', 'completed')
+                    ->first();
+
+                if (!$existingTask) {
+                    SeoTask::create([
+                        'site_id' => $audit->site_id,
+                        'seo_audit_id' => $audit->id,
+                        'created_by' => null, // Sistema
+                        'title' => $taskData['title'],
+                        'description' => $taskData['description'] . "\n\nError detectado: {$error}",
+                        'url' => $audit->url,
+                        'priority' => $taskData['priority'],
+                        'status' => 'pending',
+                    ]);
+                    $tasksCreated++;
+                }
+            } else {
+                // Tarea genérica para otros errores
+                SeoTask::create([
+                    'site_id' => $audit->site_id,
+                    'seo_audit_id' => $audit->id,
+                    'created_by' => null,
+                    'title' => 'Corregir error SEO: ' . Str::limit($error, 50),
+                    'description' => "Error detectado en la auditoría:\n{$error}",
+                    'url' => $audit->url,
+                    'priority' => 'high',
+                    'status' => 'pending',
+                ]);
+                $tasksCreated++;
+            }
+        }
+
+        // Crear tareas desde advertencias críticas
+        foreach ($warnings as $warning) {
+            if (strpos($warning, 'imágenes sin atributo ALT') !== false) {
+                // Extraer número de imágenes
+                preg_match('/(\d+)\s+imágenes sin atributo ALT/', $warning, $matches);
+                $count = $matches[1] ?? 0;
+
+                if ($count > 0) {
+                    $existingTask = SeoTask::where('site_id', $audit->site_id)
+                        ->where('url', $audit->url)
+                        ->where('title', 'like', '%imágenes sin ALT%')
+                        ->where('status', '!=', 'completed')
+                        ->first();
+
+                    if (!$existingTask) {
+                        SeoTask::create([
+                            'site_id' => $audit->site_id,
+                            'seo_audit_id' => $audit->id,
+                            'created_by' => null,
+                            'title' => "Agregar atributo ALT a {$count} imágenes",
+                            'description' => "Se detectaron {$count} imágenes sin atributo ALT. Es importante para accesibilidad y SEO.",
+                            'url' => $audit->url,
+                            'priority' => $count > 5 ? 'high' : 'medium',
+                            'status' => 'pending',
+                        ]);
+                        $tasksCreated++;
+                    }
+                }
+            }
+        }
+
+        if ($tasksCreated > 0) {
+            Log::info("Se generaron {$tasksCreated} tareas automáticamente desde la auditoría {$audit->id}");
         }
     }
 }

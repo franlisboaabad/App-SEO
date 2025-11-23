@@ -23,6 +23,9 @@ class AuditResult extends Model
         'internal_links_count',
         'external_links_count',
         'broken_links_count',
+        'internal_links',
+        'external_links',
+        'broken_links',
         'ttfb',
         'status_code',
         'errors',
@@ -32,6 +35,9 @@ class AuditResult extends Model
     protected $casts = [
         'errors' => 'array',
         'warnings' => 'array',
+        'internal_links' => 'array',
+        'external_links' => 'array',
+        'broken_links' => 'array',
         'ttfb' => 'decimal:3',
     ];
 
