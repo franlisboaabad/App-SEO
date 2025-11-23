@@ -12,7 +12,7 @@ class GoogleSearchConsoleService
 {
     /**
      * Obtener token de acceso usando credenciales JSON
-     * Las credenciales deben contener: access_token, refresh_token, client_id, client_secret
+     * Soporta tanto OAuth2 (refresh_token) como Service Account (JWT)
      */
     private function getAccessToken($credentials)
     {
@@ -22,6 +22,15 @@ class GoogleSearchConsoleService
                 $credentials = json_decode($credentials, true);
             }
 
+            // Detectar tipo de credenciales
+            $isServiceAccount = isset($credentials['type']) && $credentials['type'] === 'service_account';
+
+            if ($isServiceAccount) {
+                // Autenticación con Service Account (JWT)
+                return $this->getServiceAccountToken($credentials);
+            }
+
+            // Autenticación OAuth2
             // Si hay access_token y no está expirado, usarlo
             if (isset($credentials['access_token']) && isset($credentials['expires_at'])) {
                 $expiresAt = Carbon::parse($credentials['expires_at']);
@@ -40,11 +49,83 @@ class GoogleSearchConsoleService
                 return $credentials['access_token'];
             }
 
-            throw new \Exception('No se encontró access_token o refresh_token en las credenciales');
+            throw new \Exception('No se encontró access_token, refresh_token o credenciales de Service Account válidas');
         } catch (\Exception $e) {
             Log::error('Error obteniendo token GSC: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Obtener token usando Service Account (JWT)
+     */
+    private function getServiceAccountToken($credentials)
+    {
+        if (!isset($credentials['private_key']) || !isset($credentials['client_email'])) {
+            throw new \Exception('Service Account requiere private_key y client_email');
+        }
+
+        $now = time();
+        $jwt = [
+            'iss' => $credentials['client_email'],
+            'scope' => 'https://www.googleapis.com/auth/webmasters.readonly',
+            'aud' => $credentials['token_uri'] ?? 'https://oauth2.googleapis.com/token',
+            'exp' => $now + 3600,
+            'iat' => $now,
+        ];
+
+        // Crear y firmar JWT
+        $jwtString = $this->createJWT($jwt, $credentials['private_key']);
+
+        // Intercambiar JWT por access_token
+        $response = Http::asForm()->post($credentials['token_uri'] ?? 'https://oauth2.googleapis.com/token', [
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion' => $jwtString,
+        ]);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            return $data['access_token'];
+        }
+
+        throw new \Exception('Error obteniendo token de Service Account: ' . $response->body());
+    }
+
+    /**
+     * Crear y firmar JWT
+     */
+    private function createJWT($payload, $privateKey)
+    {
+        // Base64Url encode
+        $base64UrlEncode = function($data) {
+            return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+        };
+
+        // Header
+        $header = [
+            'alg' => 'RS256',
+            'typ' => 'JWT',
+        ];
+
+        // Decodificar la clave privada (puede venir con \n escapados)
+        $privateKey = str_replace(['\\n', '\n'], "\n", $privateKey);
+
+        // Crear partes del JWT
+        $headerEncoded = $base64UrlEncode(json_encode($header));
+        $payloadEncoded = $base64UrlEncode(json_encode($payload));
+
+        // Firmar
+        $signature = '';
+        openssl_sign(
+            $headerEncoded . '.' . $payloadEncoded,
+            $signature,
+            $privateKey,
+            OPENSSL_ALGO_SHA256
+        );
+
+        $signatureEncoded = $base64UrlEncode($signature);
+
+        return $headerEncoded . '.' . $payloadEncoded . '.' . $signatureEncoded;
     }
 
     /**

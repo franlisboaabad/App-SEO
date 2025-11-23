@@ -31,20 +31,52 @@ class SeoAuditService
             try {
                 // Obtener contenido de la página
                 $startTime = microtime(true);
-                $response = Http::timeout(30)->get($url);
+
+                try {
+                    // Desactivar verificación SSL para desarrollo (evita error cURL 60)
+                    $response = Http::timeout(30)
+                        ->withoutVerifying()
+                        ->get($url);
+                } catch (\Exception $httpException) {
+                    // Capturar y formatear mejor el mensaje de error
+                    $errorMsg = $httpException->getMessage();
+
+                    // Si es error SSL, dar mensaje más claro
+                    if (strpos($errorMsg, 'SSL') !== false || strpos($errorMsg, 'certificate') !== false) {
+                        throw new Exception("Error SSL: No se pudo verificar el certificado. Esto puede ocurrir en desarrollo local.");
+                    }
+
+                    // Si es timeout
+                    if (strpos($errorMsg, 'timeout') !== false) {
+                        throw new Exception("Timeout: La página tardó más de 30 segundos en responder.");
+                    }
+
+                    // Error genérico de conexión
+                    throw new Exception("Error de conexión: " . $errorMsg);
+                }
+
                 $endTime = microtime(true);
                 $ttfb = $endTime - $startTime;
 
                 $statusCode = $response->status();
-                $html = $response->body();
 
                 if ($statusCode >= 400) {
-                    throw new Exception("HTTP Error: {$statusCode}");
+                    throw new Exception("HTTP Error {$statusCode}: " . ($response->body() ?: 'Sin respuesta del servidor'));
+                }
+
+                $html = $response->body();
+
+                if (empty($html)) {
+                    throw new Exception("La página no devolvió contenido HTML");
                 }
 
                 // Analizar HTML
-                $crawler = new Crawler($html);
-                $result = $this->analyzePage($crawler, $url, $ttfb, $statusCode);
+                try {
+                    $crawler = new Crawler($html);
+                    $result = $this->analyzePage($crawler, $url, $ttfb, $statusCode);
+                } catch (\Exception $crawlerException) {
+                    throw new Exception("Error al analizar el HTML: " . $crawlerException->getMessage());
+                }
 
                 // Guardar resultados
                 $auditResult = AuditResult::create([
@@ -224,17 +256,31 @@ class SeoAuditService
      */
     private function normalizeUrl($url, $baseDomain)
     {
-        // Si la URL no tiene protocolo, agregarlo
-        if (!preg_match('/^https?:\/\//', $url)) {
-            $url = 'https://' . ltrim($url, '/');
+        // Limpiar espacios
+        $url = trim($url);
+        $baseDomain = trim($baseDomain);
+
+        // Limpiar barra final del dominio base si existe
+        $baseDomain = rtrim($baseDomain, '/');
+
+        // Si la URL ya tiene protocolo, usarla tal cual
+        if (preg_match('/^https?:\/\//', $url)) {
+            return $url;
         }
 
-        // Si es una URL relativa, agregar el dominio base
+        // Si es una URL relativa (empieza con /), agregar dominio base
         if (strpos($url, '/') === 0) {
-            $url = 'https://' . $baseDomain . $url;
+            return 'https://' . $baseDomain . $url;
         }
 
-        return $url;
+        // Si no tiene protocolo, agregarlo con el dominio base
+        // Si la URL contiene el dominio, solo agregar protocolo
+        if (strpos($url, $baseDomain) !== false) {
+            return 'https://' . ltrim($url, '/');
+        }
+
+        // Por defecto, agregar protocolo y dominio base
+        return 'https://' . $baseDomain . '/' . ltrim($url, '/');
     }
 
     /**

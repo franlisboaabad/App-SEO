@@ -41,6 +41,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Dashboard SEO
     Route::get('sites/{site}/dashboard', [SiteController::class, 'dashboard'])->name('sites.dashboard');
 
+    // Sincronizar métricas
+    Route::post('sites/{site}/sync-metrics', [SiteController::class, 'syncMetrics'])->name('sites.sync-metrics');
+
     // Rutas de auditorías SEO
     Route::post('sites/{site}/audit', [SeoAuditController::class, 'runAudit'])->name('sites.audit');
     Route::get('sites/{site}/audits', [SeoAuditController::class, 'index'])->name('sites.audits');

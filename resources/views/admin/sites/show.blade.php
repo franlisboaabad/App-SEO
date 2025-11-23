@@ -19,6 +19,15 @@
 @stop
 
 @section('content')
+    @if (session()->has('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session()->get('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-md-8">
             <div class="card">
@@ -99,9 +108,9 @@
                     <a href="{{ route('sites.audits', $site) }}" class="btn btn-secondary btn-block mb-2">
                         <i class="fas fa-history"></i> Historial de Auditorías
                     </a>
-                    <a href="#" class="btn btn-success btn-block mb-2">
+                    <button type="button" class="btn btn-success btn-block mb-2" data-toggle="modal" data-target="#syncMetricsModal">
                         <i class="fas fa-sync"></i> Sincronizar Métricas
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -164,9 +173,73 @@
     </div>
 </div>
 
+<!-- Modal para sincronizar métricas -->
+<div class="modal fade" id="syncMetricsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sincronizar Métricas de Google Search Console</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('sites.sync-metrics', $site) }}" method="POST" id="syncMetricsForm">
+                @csrf
+                <div class="modal-body">
+                    @if(!$site->gsc_property || !$site->gsc_credentials)
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            El sitio no tiene configuradas las credenciales de Google Search Console.
+                            <a href="{{ route('sites.edit', $site) }}" class="alert-link">Configurar credenciales</a>
+                        </div>
+                    @else
+                        <div class="form-group">
+                            <label for="sync_days">Días a sincronizar</label>
+                            <select name="days" id="sync_days" class="form-control">
+                                <option value="7" selected>Últimos 7 días</option>
+                                <option value="14">Últimos 14 días</option>
+                                <option value="30">Últimos 30 días</option>
+                                <option value="60">Últimos 60 días</option>
+                                <option value="90">Últimos 90 días</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                Se sincronizarán las métricas desde hoy hacia atrás según el período seleccionado.
+                                La sincronización se ejecutará en segundo plano.
+                            </small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Nota:</strong> La sincronización puede tardar varios minutos dependiendo de la cantidad de datos.
+                            Puedes verificar el progreso en el dashboard SEO.
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    @if($site->gsc_property && $site->gsc_credentials)
+                        <button type="submit" class="btn btn-success" id="syncButton">
+                            <i class="fas fa-sync"></i> Sincronizar Métricas
+                        </button>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section('js')
     <script>
         console.log('Sitio: {{ $site->nombre }}');
+
+        // Mostrar loading al sincronizar métricas
+        document.getElementById('syncMetricsForm')?.addEventListener('submit', function(e) {
+            const button = document.getElementById('syncButton');
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+            }
+        });
     </script>
 @stop
 

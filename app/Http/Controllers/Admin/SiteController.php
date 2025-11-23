@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Site;
 use App\Models\SeoMetric;
 use App\Models\SeoAudit;
+use App\Jobs\SyncGoogleSearchConsoleMetrics;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ class SiteController extends Controller
         $this->middleware('can:admin.sites.edit')->only('edit', 'update');
         $this->middleware('can:admin.sites.show')->only('show');
         $this->middleware('can:admin.sites.dashboard')->only('dashboard');
+        $this->middleware('can:admin.sites.show')->only('syncMetrics');
         $this->middleware('can:admin.sites.destroy')->only('destroy');
     }
 
@@ -213,6 +215,38 @@ class SiteController extends Controller
 
         return redirect()->route('sites.index')
             ->with('success', 'Sitio actualizado exitosamente.');
+    }
+
+    /**
+     * Sincronizar métricas de Google Search Console
+     *
+     * @param  \App\Models\Site  $site
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function syncMetrics(Site $site, Request $request)
+    {
+        try {
+            if (!$site->gsc_property || !$site->gsc_credentials) {
+                return back()->with('error', 'El sitio no tiene configuradas las credenciales de Google Search Console.');
+            }
+
+            if (!$site->estado) {
+                return back()->with('error', 'El sitio está inactivo. Active el sitio para sincronizar métricas.');
+            }
+
+            // Obtener días a sincronizar (por defecto 7 días)
+            $days = (int) $request->get('days', 7);
+            $endDate = Carbon::yesterday()->format('Y-m-d');
+            $startDate = Carbon::parse($endDate)->subDays($days - 1)->format('Y-m-d');
+
+            // Encolar job de sincronización
+            SyncGoogleSearchConsoleMetrics::dispatch($site, $startDate, $endDate);
+
+            return back()->with('success', "Sincronización de métricas encolada correctamente. Se sincronizarán los últimos {$days} días en segundo plano.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al encolar sincronización: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -99,8 +99,47 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     @elseif($audit->status == 'failed')
-                                        <span class="text-danger" title="{{ $audit->error_message }}">
-                                            <i class="fas fa-exclamation-triangle"></i>
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger"
+                                                data-toggle="modal"
+                                                data-target="#errorModal{{ $audit->id }}">
+                                            <i class="fas fa-exclamation-triangle"></i> Ver Error
+                                        </button>
+
+                                        <!-- Modal para mostrar error -->
+                                        <div class="modal fade" id="errorModal{{ $audit->id }}" tabindex="-1" role="dialog">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">
+                                                            <i class="fas fa-exclamation-triangle"></i> Error en Auditoría
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal">
+                                                            <span>&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p><strong>URL:</strong> <a href="{{ $audit->url }}" target="_blank">{{ $audit->url }}</a></p>
+                                                        <p><strong>Fecha:</strong> {{ $audit->created_at->format('d/m/Y H:i:s') }}</p>
+                                                        <hr>
+                                                        <p><strong>Mensaje de Error:</strong></p>
+                                                        <div class="alert alert-danger">
+                                                            {{ $audit->error_message ?? 'Error desconocido' }}
+                                                        </div>
+                                                        <p class="text-muted small">
+                                                            <i class="fas fa-info-circle"></i>
+                                                            Posibles causas: timeout de conexión, error SSL, página no accesible, o error al procesar el HTML.
+                                                        </p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @elseif($audit->status == 'processing')
+                                        <span class="badge badge-info">
+                                            <i class="fas fa-spinner fa-spin"></i> Procesando...
                                         </span>
                                     @else
                                         <span class="text-muted">-</span>
