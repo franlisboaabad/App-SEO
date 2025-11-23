@@ -87,6 +87,14 @@ class Site extends Model
     }
 
     /**
+     * Relación con backlinks
+     */
+    public function backlinks()
+    {
+        return $this->hasMany(\App\Models\Backlink::class);
+    }
+
+    /**
      * Scope para sitios activos
      */
     public function scopeActive($query)

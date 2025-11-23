@@ -186,7 +186,7 @@ Tu software actualmente tiene un **nivel INTERMEDIO-AVANZADO** con funcionalidad
 
 ---
 
-#### **7. Búsqueda Global** ⏱️ 3-4 horas
+#### **7. Búsqueda Global** ⏱️ 3-4 horas realizado
 **¿Por qué?**
 - Buscar keywords, URLs, sitios rápidamente
 - Mejorar productividad

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SeoAlertController;
 use App\Http\Controllers\Admin\KeywordResearchController;
 use App\Http\Controllers\Admin\SerpAnalysisController;
 use App\Http\Controllers\Admin\GlobalSearchController;
+use App\Http\Controllers\Admin\BacklinkController;
 use App\Http\Controllers\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -122,6 +123,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     // Rutas de Búsqueda Global
     Route::get('search', [GlobalSearchController::class, 'search'])->name('global-search.search');
     Route::get('search/autocomplete', [GlobalSearchController::class, 'autocomplete'])->name('global-search.autocomplete');
+
+    // Rutas de Backlinks
+    Route::resource('backlinks', BacklinkController::class);
+    Route::get('sites/{site}/backlinks/dashboard', [BacklinkController::class, 'dashboard'])->name('backlinks.dashboard');
+    Route::post('sites/{site}/backlinks/sync-gsc', [BacklinkController::class, 'syncFromGSC'])->name('backlinks.sync-gsc');
+    Route::post('backlinks/import-csv', [BacklinkController::class, 'importCSV'])->name('backlinks.import-csv');
 });
 
 

@@ -373,6 +373,25 @@ return [
             ],
         ],
         [
+            'text'    => 'Backlinks',
+            'icon'    => 'fas fa-link',
+            'can'     => 'admin.sites.index',
+            'submenu' => [
+                [
+                    'text' => 'Lista de Backlinks',
+                    'route'  => 'backlinks.index',
+                    'icon' => 'fas fa-list',
+                    'can' => 'admin.sites.index',
+                ],
+                [
+                    'text' => 'Agregar Backlink',
+                    'route'  => 'backlinks.create',
+                    'icon' => 'fas fa-plus',
+                    'can' => 'admin.sites.index',
+                ],
+            ],
+        ],
+        [
             'text'    => 'Tareas SEO',
             'icon'    => 'fas fa-tasks',
             'can'     => 'admin.tasks.index',
